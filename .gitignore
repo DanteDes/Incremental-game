@@ -17,3 +17,6 @@ mono_crash.*.json
 
 # Claude/superpowers-generated plan and spec docs (local only, never committed)
 docs/superpowers/
+
+# Local git worktrees
+.worktrees/
