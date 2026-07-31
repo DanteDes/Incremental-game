@@ -1,24 +1,42 @@
 extends Node
 
-enum Stage { AIR = 0, HAY = 1, TREE = 2, STONE = 3, WATERFALL = 4, SENSEI = 5 }
+enum Stage {
+	AIR = 0, HAY = 1, TREE = 2, STONE = 3,
+	WATERFALL = 4, VOLCANO = 5, MOUNTAIN = 6, TYPHOON = 7,
+	SENSEI = 8, SPIRIT_WOLF = 9, DRAGON = 10, WIND_GOD = 11
+}
 
-const STAGE_NAMES = ["el Aire", "el Rollo de Paja", "el Árbol", "la Piedra", "la Cascada", "el Sensei"]
-const STAGE_HP    = [INF,       100.0,               500.0,      3000.0,      INF,           20000.0]
-const STAGE_BONUS = [0,         60,                  250,        1000,        0,             5000]
+const STAGE_NAMES = [
+	"el Aire", "el Rollo de Paja", "el Árbol", "la Piedra",
+	"la Cascada", "el Volcán", "la Montaña", "el Tifón",
+	"el Sensei", "el Lobo Espíritu", "el Dragón Ancestral", "el Dios del Viento"
+]
+const STAGE_HP = [
+	INF,     100.0,   500.0,   3000.0,
+	INF,     6000.0,  20000.0, INF,
+	50000.0, 150000.0, 600000.0, 2500000.0
+]
+const STAGE_BONUS = [
+	0,      60,     250,    1000,
+	0,      3000,   10000,  0,
+	20000,  80000,  300000, 1000000
+]
 
 const AIR_PUNCHES_TO_ADVANCE       = 25
 const WATERFALL_PUNCHES_TO_ADVANCE = 300
+const TYPHOON_PUNCHES_TO_ADVANCE   = 500
 
 var stage: int = Stage.AIR
 var target_hp: float = INF
 var target_max_hp: float = INF
 
-var air_punches: int = 0
+var air_punches: int      = 0
 var waterfall_punches: int = 0
-var sensei_defeated: bool = false
+var typhoon_punches: int   = 0
+var game_complete: bool    = false
 
-var strength_level: int = 0
-var speed_level: int    = 0
+var strength_level: int  = 0
+var speed_level: int     = 0
 var technique_level: int = 0
 
 var strength: float  = 1.0
@@ -31,13 +49,23 @@ var ki_level: int        = 0
 
 var gold: int = 0
 
+# Elements: [water, fire, earth, wind]
+var elements: Array[bool] = [false, false, false, false]
+
 signal stage_changed(s: int)
 signal gold_changed(g: int)
 signal stats_changed()
 signal skill_tree_unlocked_signal()
+signal element_gained(index: int)
 
 func _ready() -> void:
 	_apply_stage(Stage.AIR)
+
+func effective_speed() -> float:
+	return speed + (0.5 if elements[3] else 0.0)
+
+func effective_technique() -> float:
+	return minf(technique + (0.15 if elements[0] else 0.0), 0.95)
 
 func _apply_stage(s: int) -> void:
 	stage = s
@@ -45,9 +73,12 @@ func _apply_stage(s: int) -> void:
 	target_hp = target_max_hp
 	stage_changed.emit(s)
 
-# Returns { damage: float, is_crit: bool }
-func punch() -> Dictionary:
-	var dmg: float = strength * (2.5 if randf() < technique else 1.0)
+func punch(combo_mult: float = 1.0) -> Dictionary:
+	var is_crit := randf() < effective_technique()
+	var dmg: float = strength * (2.5 if is_crit else 1.0) * combo_mult
+
+	if elements[1]:
+		dmg += strength * 0.3
 
 	if elemental_level > 0:
 		dmg += elemental_level * strength * 0.35
@@ -62,23 +93,38 @@ func punch() -> Dictionary:
 		Stage.WATERFALL:
 			waterfall_punches += 1
 			if waterfall_punches >= WATERFALL_PUNCHES_TO_ADVANCE:
+				_unlock_element(0)
+				_apply_stage(Stage.VOLCANO)
+		Stage.TYPHOON:
+			typhoon_punches += 1
+			if typhoon_punches >= TYPHOON_PUNCHES_TO_ADVANCE:
+				_unlock_element(3)
 				_apply_stage(Stage.SENSEI)
-		Stage.SENSEI:
-			if not sensei_defeated:
+		Stage.WIND_GOD:
+			if not game_complete:
 				target_hp = maxf(0.0, target_hp - dmg)
 				if target_hp == 0.0:
-					sensei_defeated = true
-					stage_changed.emit(Stage.SENSEI)
+					game_complete = true
+					gold += STAGE_BONUS[Stage.WIND_GOD]
+					gold_changed.emit(gold)
+					stage_changed.emit(Stage.WIND_GOD)
 		_:
 			target_hp = maxf(0.0, target_hp - dmg)
 			if target_hp == 0.0:
 				_destroy_target()
 
-	var earned: int = 1 if stage == Stage.AIR else maxi(1, int(dmg * 0.25))
+	var gold_mult: float = 1.25 if elements[2] else 1.0
+	var earned: int = 1 if stage == Stage.AIR else maxi(1, int(dmg * 0.25 * gold_mult))
 	gold += earned
 	gold_changed.emit(gold)
 
-	return {"damage": dmg, "is_crit": dmg > strength * 1.5}
+	return {"damage": dmg, "is_crit": is_crit}
+
+func _unlock_element(index: int) -> void:
+	if elements[index]: return
+	elements[index] = true
+	element_gained.emit(index)
+	stats_changed.emit()
 
 func _destroy_target() -> void:
 	gold += STAGE_BONUS[stage]
@@ -89,8 +135,12 @@ func _destroy_target() -> void:
 		skill_tree_unlocked_signal.emit()
 		stats_changed.emit()
 
-	var next: int = mini(stage + 1, Stage.SENSEI)
-	_apply_stage(next)
+	if stage == Stage.VOLCANO:
+		_unlock_element(1)
+	elif stage == Stage.MOUNTAIN:
+		_unlock_element(2)
+
+	_apply_stage(stage + 1)
 
 # ── Costs ─────────────────────────────────────────────────────────────────────
 func strength_cost() -> int:  return int(10  * pow(1.6, strength_level))

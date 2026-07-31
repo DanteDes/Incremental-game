@@ -13,16 +13,21 @@ func _on_stage_changed(s: int) -> void:
 
 func _draw() -> void:
 	match stage:
-		0: _draw_air()
-		1: _draw_hay()
-		2: _draw_tree()
-		3: _draw_stone()
-		4: _draw_waterfall()
-		5: _draw_sensei()
+		0:  _draw_air()
+		1:  _draw_hay()
+		2:  _draw_tree()
+		3:  _draw_stone()
+		4:  _draw_waterfall()
+		5:  _draw_volcano()
+		6:  _draw_mountain()
+		7:  _draw_typhoon()
+		8:  _draw_sensei()
+		9:  _draw_spirit_wolf()
+		10: _draw_dragon()
+		11: _draw_wind_god()
 
 # ── Stage 0 — Air ─────────────────────────────────────────────────────────────
 func _draw_air() -> void:
-	# Swirling ki particles
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 999
 	for i in 12:
@@ -32,10 +37,8 @@ func _draw_air() -> void:
 		var r     := rng.randf_range(3, 9)
 		var a     := rng.randf_range(0.15, 0.45)
 		draw_circle(pos, r, Color(0.7, 0.8, 1.0, a))
-	# Center glow
 	draw_circle(Vector2(0, -40), 22, Color(0.6, 0.75, 1.0, 0.12))
 	draw_circle(Vector2(0, -40), 12, Color(0.7, 0.85, 1.0, 0.18))
-	# Label-like "???" marker
 	for i in 3:
 		draw_circle(Vector2(-12 + i * 12, -72), 4, Color(0.7, 0.8, 1.0, 0.5))
 
@@ -45,48 +48,34 @@ func _draw_hay() -> void:
 	var col_dark := Color(0.62, 0.52, 0.1)
 	var col_rope := Color(0.45, 0.3, 0.1)
 
-	# Shadow
 	_ellipse(Vector2(0, 6), 38, 9, Color(0, 0, 0, 0.3))
-
-	# Main cylinder body
 	draw_rect(Rect2(-34, -96, 68, 100), col_main)
-
-	# Top ellipse (cylinder cap)
 	_ellipse(Vector2(0, -96), 34, 12, col_main.lightened(0.1))
-	# Bottom ellipse
 	_ellipse(Vector2(0, 4), 34, 12, col_dark)
 
-	# Straw texture lines
 	for i in 10:
 		var y := -92.0 + i * 9.5
 		draw_line(Vector2(-34, y), Vector2(34, y), col_dark, 1.5)
 
-	# Straw end details on face
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 77
 	for i in 7:
 		var sx := -28.0 + i * 9.0
 		draw_line(Vector2(sx, -96), Vector2(sx + rng.randf_range(-3, 3), -104), col_dark, 1)
 
-	# Rope bands
 	for ry in [-75.0, -40.0, -10.0]:
 		draw_rect(Rect2(-36, ry, 72, 7), col_rope)
 		_ellipse(Vector2(0, ry + 3), 36, 7, col_rope)
-
-	# Rope knot on right side
 	draw_circle(Vector2(36, -40), 6, col_rope.darkened(0.2))
 
 # ── Stage 2 — Tree ────────────────────────────────────────────────────────────
 func _draw_tree() -> void:
 	_ellipse(Vector2(0, 6), 30, 8, Color(0, 0, 0, 0.3))
-
-	# Roots
 	for i in 4:
 		var angle := (-0.4 + i * 0.28) * PI
 		var ep    := Vector2(cos(angle) * 32, sin(angle) * 12 + 4)
 		draw_line(Vector2(0, 4), ep, Color(0.28, 0.17, 0.06), 4, true)
 
-	# Trunk
 	draw_polygon(
 		PackedVector2Array([
 			Vector2(-14, -112), Vector2(14, -112),
@@ -94,13 +83,11 @@ func _draw_tree() -> void:
 		]),
 		PackedColorArray([Color(0.36, 0.22, 0.08)])
 	)
-	# Bark detail lines
 	for i in 5:
 		var by := -100.0 + i * 22.0
 		draw_line(Vector2(-14, by), Vector2(-8, by + 10), Color(0.25, 0.15, 0.05), 1.5)
 		draw_line(Vector2(5,  by), Vector2(12, by + 8),  Color(0.25, 0.15, 0.05), 1.5)
 
-	# Canopy layers (bottom to top, each smaller and lighter)
 	var layers := [
 		[Vector2(0, -120), 52.0, 38.0, Color(0.07, 0.4,  0.1)],
 		[Vector2(0, -152), 42.0, 30.0, Color(0.09, 0.48, 0.12)],
@@ -113,71 +100,46 @@ func _draw_tree() -> void:
 		var ry: float       = l[2]
 		var col: Color      = l[3]
 		_ellipse(center, rx, ry, col)
-		# Light highlight on top
 		_ellipse(center + Vector2(0, -ry * 0.3), rx * 0.5, ry * 0.3, col.lightened(0.15))
 
 # ── Stage 3 — Stone ───────────────────────────────────────────────────────────
 func _draw_stone() -> void:
 	_ellipse(Vector2(0, 6), 50, 10, Color(0, 0, 0, 0.35))
-
-	# Boulder body (irregular polygon)
 	var body := PackedVector2Array([
-		Vector2(-44, 0),
-		Vector2(-50, -28),
-		Vector2(-36, -62),
-		Vector2(-16, -88),
-		Vector2(10,  -96),
-		Vector2(36,  -80),
-		Vector2(48,  -50),
-		Vector2(44,  -18),
-		Vector2(28,   4),
+		Vector2(-44, 0),   Vector2(-50, -28), Vector2(-36, -62),
+		Vector2(-16, -88), Vector2(10,  -96), Vector2(36,  -80),
+		Vector2(48,  -50), Vector2(44,  -18), Vector2(28,   4),
 		Vector2(-10,  6),
 	])
 	draw_polygon(body, PackedColorArray([Color(0.44, 0.43, 0.48)]))
 
-	# Top highlight
 	var highlight := PackedVector2Array([
-		Vector2(-20, -60),
-		Vector2(-10, -90),
-		Vector2(10,  -96),
-		Vector2(24,  -80),
-		Vector2(14,  -58),
-		Vector2(-8,  -52),
+		Vector2(-20, -60), Vector2(-10, -90), Vector2(10,  -96),
+		Vector2(24,  -80), Vector2(14,  -58), Vector2(-8,  -52),
 	])
 	draw_polygon(highlight, PackedColorArray([Color(0.56, 0.55, 0.6)]))
 
-	# Cracks
 	draw_line(Vector2(-5,  -90), Vector2(-18, -50), Color(0.22, 0.22, 0.26), 2.5, true)
 	draw_line(Vector2(-18, -50), Vector2(-8,  -22), Color(0.22, 0.22, 0.26), 2,   true)
 	draw_line(Vector2(12,  -70), Vector2(22,  -38), Color(0.22, 0.22, 0.26), 2,   true)
 	draw_line(Vector2(-18, -50), Vector2(5,   -44), Color(0.22, 0.22, 0.26), 1.5, true)
-
-	# Moss patches
 	draw_circle(Vector2(-30, -20), 8, Color(0.18, 0.38, 0.14, 0.7))
-	draw_circle(Vector2(20, -12),  6, Color(0.15, 0.35, 0.12, 0.7))
+	draw_circle(Vector2(20,  -12), 6, Color(0.15, 0.35, 0.12, 0.7))
 
 # ── Stage 4 — Waterfall ───────────────────────────────────────────────────────
 func _draw_waterfall() -> void:
-	# Cliff / rock top
 	var cliff := PackedVector2Array([
-		Vector2(-58, -162),
-		Vector2(-70, -145),
-		Vector2(-66, -128),
-		Vector2(66,  -128),
-		Vector2(70,  -145),
-		Vector2(58,  -162),
-		Vector2(40,  -172),
-		Vector2(-40, -172),
+		Vector2(-58, -162), Vector2(-70, -145), Vector2(-66, -128),
+		Vector2(66,  -128), Vector2(70,  -145), Vector2(58,  -162),
+		Vector2(40,  -172), Vector2(-40, -172),
 	])
 	draw_polygon(cliff, PackedColorArray([Color(0.35, 0.32, 0.28)]))
-	draw_polygon(cliff, PackedColorArray([Color(0.42, 0.38, 0.33)]))  # top lighter
 	var cliff_top := PackedVector2Array([
 		Vector2(-58, -162), Vector2(58, -162),
 		Vector2(40,  -172), Vector2(-40, -172),
 	])
 	draw_polygon(cliff_top, PackedColorArray([Color(0.48, 0.44, 0.38)]))
 
-	# Water streams
 	var stream_cols := [
 		Color(0.3,  0.6,  0.9,  0.9),
 		Color(0.45, 0.72, 0.98, 0.85),
@@ -187,38 +149,144 @@ func _draw_waterfall() -> void:
 	for i in 4:
 		var sx := -38.0 + i * 26.0
 		draw_rect(Rect2(sx, -128, 20, 140), stream_cols[i])
-		# White highlight stripe
 		draw_rect(Rect2(sx + 2, -128, 4, 140), Color(0.8, 0.9, 1.0, 0.5))
 
-	# Pool / splash at bottom
-	_ellipse(Vector2(0, 14), 60, 14, Color(0.3, 0.55, 0.85, 0.6))
-	_ellipse(Vector2(0, 12), 48, 10, Color(0.55, 0.78, 1.0, 0.4))
-
-	# Mist particles
+	_ellipse(Vector2(0, 14),  60, 14, Color(0.3, 0.55, 0.85, 0.6))
+	_ellipse(Vector2(0, 12),  48, 10, Color(0.55, 0.78, 1.0, 0.4))
 	for i in 5:
-		var mx := -40.0 + i * 20.0
-		draw_circle(Vector2(mx, 5), 12, Color(0.8, 0.9, 1.0, 0.2))
+		draw_circle(Vector2(-40.0 + i * 20.0, 5), 12, Color(0.8, 0.9, 1.0, 0.2))
 	draw_circle(Vector2(0, 2), 30, Color(0.85, 0.93, 1.0, 0.15))
 
-# ── Stage 5 — Sensei ──────────────────────────────────────────────────────────
+# ── Stage 5 — Volcano ─────────────────────────────────────────────────────────
+func _draw_volcano() -> void:
+	_ellipse(Vector2(0, 8), 65, 14, Color(1.0, 0.3, 0.0, 0.35))
+	_ellipse(Vector2(0, 6), 48, 10, Color(1.0, 0.5, 0.0, 0.45))
+
+	draw_polygon(
+		PackedVector2Array([
+			Vector2(-62, 8), Vector2(-32, -98), Vector2(-20, -110),
+			Vector2(20, -110), Vector2(32, -98), Vector2(62, 8),
+		]),
+		PackedColorArray([Color(0.18, 0.12, 0.10)])
+	)
+
+	for i in 4:
+		var y  := -18.0 + i * 20.0
+		var wi := 56.0 - i * 8.0
+		draw_line(Vector2(-wi, y), Vector2(-wi * 0.4, y - 9), Color(0.28, 0.18, 0.14), 1.5)
+		draw_line(Vector2(wi,  y), Vector2(wi  * 0.4, y - 9), Color(0.28, 0.18, 0.14), 1.5)
+
+	_ellipse(Vector2(0, -110), 24, 9, Color(0.22, 0.14, 0.11))
+	_ellipse(Vector2(0, -110), 20, 7, Color(0.9, 0.4, 0.0, 0.85))
+	_ellipse(Vector2(0, -110), 14, 5, Color(1.0, 0.62, 0.0))
+	_ellipse(Vector2(0, -111), 8,  3, Color(1.0, 0.88, 0.2))
+
+	draw_line(Vector2(-14, -82), Vector2(-20, -44), Color(1.0, 0.4, 0.0, 0.75), 3, true)
+	draw_circle(Vector2(-20, -44), 5, Color(1.0, 0.5, 0.0, 0.5))
+	draw_line(Vector2(10, -90), Vector2(16, -52), Color(1.0, 0.5, 0.1, 0.65), 2, true)
+	draw_circle(Vector2(16, -52), 4, Color(1.0, 0.6, 0.0, 0.5))
+
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 12
+	for i in 6:
+		var sx := rng.randf_range(-14, 14)
+		var sy := -122.0 - i * 11.0
+		var sr := rng.randf_range(5, 11)
+		draw_circle(Vector2(sx, sy), sr, Color(0.3, 0.27, 0.3, 0.14 - i * 0.018))
+
+# ── Stage 6 — Mountain ────────────────────────────────────────────────────────
+func _draw_mountain() -> void:
+	_ellipse(Vector2(0, 8), 65, 12, Color(0, 0, 0, 0.3))
+
+	draw_polygon(
+		PackedVector2Array([
+			Vector2(-64, 8), Vector2(-46, -58), Vector2(-28, -128),
+			Vector2(0, -162), Vector2(28, -128), Vector2(46, -58), Vector2(64, 8),
+		]),
+		PackedColorArray([Color(0.36, 0.33, 0.40)])
+	)
+
+	draw_polygon(
+		PackedVector2Array([
+			Vector2(-64, 8), Vector2(-46, -58), Vector2(-28, -128),
+			Vector2(0, -162), Vector2(-16, -104), Vector2(-32, -42),
+		]),
+		PackedColorArray([Color(0.22, 0.20, 0.26)])
+	)
+
+	draw_polygon(
+		PackedVector2Array([
+			Vector2(-30, -128), Vector2(0, -162), Vector2(30, -128),
+			Vector2(20, -116),  Vector2(0, -140), Vector2(-20, -116),
+		]),
+		PackedColorArray([Color(0.88, 0.93, 1.0)])
+	)
+
+	for i in 5:
+		var cx := -16.0 + i * 8.0
+		var ch  := 10.0 + (2.0 - absf(i - 2.0)) * 6.0
+		draw_polygon(
+			PackedVector2Array([
+				Vector2(cx, -127 - ch),
+				Vector2(cx - 5, -122),
+				Vector2(cx + 5, -122),
+			]),
+			PackedColorArray([Color(0.76, 0.90, 1.0, 0.9)])
+		)
+
+	draw_line(Vector2(-18, -62), Vector2(-6, -22), Color(0.18, 0.16, 0.20), 2, true)
+	draw_line(Vector2(22,  -80), Vector2(32, -32), Color(0.18, 0.16, 0.20), 1.5, true)
+	draw_line(Vector2(-8,  -40), Vector2(10, -24), Color(0.18, 0.16, 0.20), 1, true)
+
+# ── Stage 7 — Typhoon ─────────────────────────────────────────────────────────
+func _draw_typhoon() -> void:
+	_ellipse(Vector2(0, -40), 72, 72, Color(0.2, 0.35, 0.65, 0.12))
+	_ellipse(Vector2(0, -40), 56, 56, Color(0.3, 0.50, 0.80, 0.18))
+
+	for i in 4:
+		var base  := float(i) * TAU / 4.0
+		var r     := 52.0 - i * 9.0
+		var alpha := 0.75 - i * 0.12
+		draw_arc(Vector2(0, -40), r, base, base + TAU * 0.65, 40,
+				 Color(0.65, 0.85, 1.0, alpha), 3.0 - i * 0.55, true)
+
+	_ellipse(Vector2(0, -40), 17, 17, Color(0.05, 0.08, 0.20))
+	_ellipse(Vector2(0, -40), 11, 11, Color(0.10, 0.16, 0.34))
+	draw_circle(Vector2(0, -40), 5, Color(0.45, 0.65, 1.0, 0.85))
+
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 55
+	for i in 14:
+		var angle := float(i) * TAU / 14.0 + rng.randf_range(-0.18, 0.18)
+		var r1 := rng.randf_range(20, 28)
+		var r2 := rng.randf_range(42, 65)
+		var p1 := Vector2(cos(angle) * r1, sin(angle) * r1 - 40)
+		var p2 := Vector2(cos(angle) * r2, sin(angle) * r2 - 40)
+		draw_line(p1, p2, Color(0.55, 0.80, 1.0, rng.randf_range(0.3, 0.65)),
+				  rng.randf_range(1.0, 2.5), true)
+
+	draw_polygon(
+		PackedVector2Array([Vector2(-7, -23), Vector2(7, -23), Vector2(3, 8), Vector2(-3, 8)]),
+		PackedColorArray([Color(0.14, 0.24, 0.52, 0.85)])
+	)
+
+# ── Stage 8 — Sensei ──────────────────────────────────────────────────────────
 func _draw_sensei() -> void:
 	var skin  := Color(0.86, 0.72, 0.56)
-	var gi    := Color(0.75, 0.12, 0.12)   # red gi
+	var gi    := Color(0.75, 0.12, 0.12)
 	var gi_s  := Color(0.55, 0.08, 0.08)
-	var belt  := Color(0.04, 0.04, 0.05)   # black belt
+	var belt  := Color(0.04, 0.04, 0.05)
 	var pants := Color(0.12, 0.12, 0.16)
-	var hair  := Color(0.88, 0.88, 0.9)    # white/grey hair (old master)
+	var hair  := Color(0.88, 0.88, 0.9)
 	var shoe  := Color(0.08, 0.06, 0.04)
 
 	_ellipse(Vector2(0, 6), 34, 8, Color(0, 0, 0, 0.3))
 
-	# Legs — wider fighting stance
 	draw_polygon(_trapezoid(Vector2(-12, -22), 9, 7, 32), PackedColorArray([pants]))
 	draw_rect(Rect2(-14, 7, 15, 9), shoe)
 	draw_polygon(_trapezoid(Vector2(12, -22),  9, 7, 32), PackedColorArray([pants]))
 	draw_rect(Rect2(6, 7, 15, 9), shoe)
 
-	# Body — red gi
 	draw_polygon(
 		PackedVector2Array([
 			Vector2(-18, -64), Vector2(18, -64),
@@ -233,27 +301,19 @@ func _draw_sensei() -> void:
 		]),
 		PackedColorArray([gi_s])
 	)
-	# Gi collar
 	draw_line(Vector2(0, -64), Vector2(-8, -40), Color(0.55, 0.08, 0.08), 2.5)
 	draw_line(Vector2(0, -64), Vector2(8,  -40), Color(0.55, 0.08, 0.08), 2.5)
 
-	# Belt
 	draw_rect(Rect2(-16, -30, 32, 8), belt)
 	draw_rect(Rect2(-5, -31, 10, 10), Color(0.06, 0.06, 0.08))
 
-	# Left arm — raised block
 	draw_line(Vector2(-16, -56), Vector2(-36, -44), skin, 9, true)
 	draw_line(Vector2(-36, -44), Vector2(-30, -26), skin, 8, true)
 	draw_circle(Vector2(-30, -26), 7, skin)
-
-	# Right arm — counter-punch stance
 	draw_line(Vector2(16, -56), Vector2(34, -48), skin, 9, true)
 	draw_circle(Vector2(34, -48), 7, skin)
 
-	# Head
 	draw_circle(Vector2(0, -78), 20, skin)
-
-	# White beard
 	draw_polygon(
 		PackedVector2Array([
 			Vector2(-10, -64), Vector2(10, -64),
@@ -261,31 +321,240 @@ func _draw_sensei() -> void:
 		]),
 		PackedColorArray([Color(0.92, 0.92, 0.94)])
 	)
-
-	# White hair / top knot
 	draw_arc(Vector2(0, -78), 20, PI * 0.75, PI * 2.25, 24, hair, 6, true)
 	draw_circle(Vector2(0, -96), 6, hair)
 	draw_line(Vector2(0, -90), Vector2(0, -96), hair, 4, true)
-
-	# Eyes — sharp, evaluating
 	draw_line(Vector2(-9, -80), Vector2(-4, -80), Color(0.06, 0.05, 0.04), 3, true)
 	draw_line(Vector2(4,  -80), Vector2(9,  -80), Color(0.06, 0.05, 0.04), 3, true)
 	draw_circle(Vector2(-6, -79), 2, Color(0.06, 0.05, 0.04))
 	draw_circle(Vector2(6,  -79), 2, Color(0.06, 0.05, 0.04))
-
-	# Eyebrows — stern
 	draw_line(Vector2(-10, -84), Vector2(-3, -82), Color(0.3, 0.28, 0.26), 2, true)
 	draw_line(Vector2(3,   -82), Vector2(10, -84), Color(0.3, 0.28, 0.26), 2, true)
-
-	# Mouth — serious
 	draw_line(Vector2(-6, -69), Vector2(6, -69), Color(0.65, 0.45, 0.38), 1.5)
 
-# ── Helpers ────────────────────────────────────────────────────────────────────
+# ── Stage 9 — Spirit Wolf ─────────────────────────────────────────────────────
+func _draw_spirit_wolf() -> void:
+	var ghost        := Color(0.30, 1.0, 0.60, 0.75)
+	var ghost_dim    := Color(0.18, 0.72, 0.44, 0.45)
+	var ghost_bright := Color(0.55, 1.0, 0.72, 0.92)
 
+	_ellipse(Vector2(0, -30), 72, 82, Color(0.18, 0.90, 0.50, 0.07))
+	_ellipse(Vector2(0, -30), 56, 66, Color(0.22, 0.90, 0.52, 0.12))
+
+	draw_polygon(
+		PackedVector2Array([
+			Vector2(-46, 8), Vector2(-52, -28), Vector2(-32, -72),
+			Vector2(32, -72), Vector2(52, -28), Vector2(46, 8),
+		]),
+		PackedColorArray([Color(0.14, 0.48, 0.30, 0.62)])
+	)
+
+	draw_circle(Vector2(0, -96), 38, Color(0.14, 0.48, 0.30, 0.72))
+
+	draw_polygon(
+		PackedVector2Array([
+			Vector2(-20, -82), Vector2(20, -82),
+			Vector2(24, -66),  Vector2(0, -60), Vector2(-24, -66),
+		]),
+		PackedColorArray([Color(0.11, 0.38, 0.24, 0.82)])
+	)
+
+	draw_polygon(
+		PackedVector2Array([Vector2(-38, -122), Vector2(-22, -96), Vector2(-10, -118)]),
+		PackedColorArray([ghost_dim])
+	)
+	draw_polygon(
+		PackedVector2Array([Vector2(38, -122), Vector2(22, -96), Vector2(10, -118)]),
+		PackedColorArray([ghost_dim])
+	)
+
+	draw_circle(Vector2(-14, -100), 8, ghost_bright)
+	draw_circle(Vector2(14,  -100), 8, ghost_bright)
+	draw_circle(Vector2(-14, -100), 3, Color(1.0, 1.0, 0.35))
+	draw_circle(Vector2(14,  -100), 3, Color(1.0, 1.0, 0.35))
+
+	draw_polygon(
+		PackedVector2Array([Vector2(-11, -68), Vector2(-6, -68), Vector2(-8, -55)]),
+		PackedColorArray([Color(0.85, 0.96, 0.90)])
+	)
+	draw_polygon(
+		PackedVector2Array([Vector2(6, -68), Vector2(11, -68), Vector2(8, -55)]),
+		PackedColorArray([Color(0.85, 0.96, 0.90)])
+	)
+
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 303
+	for i in 10:
+		var angle := rng.randf_range(0, TAU)
+		var dist  := rng.randf_range(48, 78)
+		var pos   := Vector2(cos(angle) * dist, sin(angle) * dist - 40)
+		draw_circle(pos, rng.randf_range(3, 9), Color(0.28, 1.0, 0.60, rng.randf_range(0.10, 0.28)))
+
+	draw_arc(Vector2(0, -96), 38, 0, TAU, 52, ghost, 2.0, true)
+
+# ── Stage 10 — Dragon ─────────────────────────────────────────────────────────
+func _draw_dragon() -> void:
+	var sc  := Color(0.72, 0.10, 0.05)
+	var scd := Color(0.48, 0.07, 0.03)
+	var scb := Color(0.90, 0.22, 0.06)
+
+	_ellipse(Vector2(0, -60), 95, 52, Color(0.55, 0.05, 0.0, 0.10))
+
+	draw_polygon(
+		PackedVector2Array([
+			Vector2(-22, -80), Vector2(-90, -132), Vector2(-112, -80),
+			Vector2(-82, -48), Vector2(-42, -58),
+		]),
+		PackedColorArray([scd])
+	)
+	for i in 3:
+		draw_line(Vector2(-22, -80), Vector2(-42.0 - i * 26, -132 + i * 16), Color(0.28, 0.04, 0.02), 1.0)
+
+	draw_polygon(
+		PackedVector2Array([
+			Vector2(22, -80), Vector2(90, -132), Vector2(112, -80),
+			Vector2(82, -48), Vector2(42, -58),
+		]),
+		PackedColorArray([scd])
+	)
+	for i in 3:
+		draw_line(Vector2(22, -80), Vector2(42.0 + i * 26, -132 + i * 16), Color(0.28, 0.04, 0.02), 1.0)
+
+	draw_polygon(
+		PackedVector2Array([
+			Vector2(-32, 8), Vector2(-36, -38), Vector2(-26, -80),
+			Vector2(26, -80), Vector2(36, -38), Vector2(32, 8),
+		]),
+		PackedColorArray([sc])
+	)
+	for row in 4:
+		for col in 3:
+			draw_arc(Vector2(-18.0 + col * 18.0, -18.0 + row * 18.0), 7, 0, PI, 12, scd, 1.5)
+
+	draw_polygon(
+		PackedVector2Array([
+			Vector2(-14, -80), Vector2(14, -80),
+			Vector2(10, -118), Vector2(-10, -118),
+		]),
+		PackedColorArray([sc])
+	)
+
+	draw_polygon(
+		PackedVector2Array([
+			Vector2(-30, -118), Vector2(30, -118), Vector2(38, -134),
+			Vector2(42, -154),  Vector2(22, -164), Vector2(-22, -164),
+			Vector2(-42, -154), Vector2(-38, -134),
+		]),
+		PackedColorArray([sc])
+	)
+
+	draw_polygon(
+		PackedVector2Array([Vector2(-18, -162), Vector2(-14, -162), Vector2(-24, -182)]),
+		PackedColorArray([scd])
+	)
+	draw_polygon(
+		PackedVector2Array([Vector2(14, -162), Vector2(18, -162), Vector2(24, -182)]),
+		PackedColorArray([scd])
+	)
+
+	draw_circle(Vector2(-18, -150), 6, Color(1.0, 0.78, 0.0))
+	draw_circle(Vector2(-18, -150), 3, Color(0.08, 0.04, 0.0))
+	draw_circle(Vector2(18,  -150), 6, Color(1.0, 0.78, 0.0))
+	draw_circle(Vector2(18,  -150), 3, Color(0.08, 0.04, 0.0))
+
+	draw_polygon(
+		PackedVector2Array([
+			Vector2(36, -142), Vector2(82, -147), Vector2(102, -132),
+			Vector2(86, -120), Vector2(40, -128),
+		]),
+		PackedColorArray([Color(1.0, 0.50, 0.0, 0.92)])
+	)
+	draw_polygon(
+		PackedVector2Array([
+			Vector2(46, -140), Vector2(78, -144), Vector2(90, -133),
+			Vector2(76, -124), Vector2(50, -130),
+		]),
+		PackedColorArray([Color(1.0, 0.86, 0.2, 0.92)])
+	)
+
+	draw_line(Vector2(28, 0),  Vector2(58, -10), sc, 12, true)
+	draw_line(Vector2(58, -10), Vector2(78, 6),  sc, 8,  true)
+	draw_line(Vector2(78, 6),  Vector2(92, -4),  sc, 5,  true)
+
+# ── Stage 11 — Wind God ───────────────────────────────────────────────────────
+func _draw_wind_god() -> void:
+	var cel  := Color(0.72, 0.90, 1.0)
+	var celb := Color(0.90, 0.97, 1.0)
+	var gold := Color(1.0,  0.90, 0.38)
+
+	_ellipse(Vector2(0, -80), 88, 88, Color(0.50, 0.80, 1.0, 0.06))
+	_ellipse(Vector2(0, -80), 72, 72, Color(0.60, 0.85, 1.0, 0.10))
+	_ellipse(Vector2(0, -80), 56, 56, Color(0.70, 0.90, 1.0, 0.14))
+
+	for i in 3:
+		var base := float(i) * TAU / 3.0
+		draw_arc(Vector2(0, -80), 66.0 - float(i) * 5.0, base, base + TAU * 0.62, 36,
+				 Color(0.60, 0.86, 1.0, 0.52 - float(i) * 0.12), 2.5 - float(i) * 0.5, true)
+
+	draw_polygon(
+		PackedVector2Array([
+			Vector2(-32, -28), Vector2(32, -28), Vector2(46, 8),
+			Vector2(26, 5), Vector2(0, 13), Vector2(-26, 5), Vector2(-46, 8),
+		]),
+		PackedColorArray([Color(0.54, 0.78, 0.96, 0.88)])
+	)
+	draw_polygon(
+		PackedVector2Array([
+			Vector2(-24, -80), Vector2(24, -80),
+			Vector2(30, -38),  Vector2(-30, -38),
+		]),
+		PackedColorArray([cel])
+	)
+
+	draw_line(Vector2(-24, -70), Vector2(-62, -92), cel, 9, true)
+	draw_line(Vector2(-62, -92), Vector2(-84, -76), cel, 7, true)
+	draw_arc(Vector2(-84, -76), 15, 0, TAU, 36, Color(0.68, 0.90, 1.0, 0.75), 2.5, true)
+	draw_circle(Vector2(-84, -76), 7, Color(0.58, 0.86, 1.0, 0.65))
+
+	draw_line(Vector2(24, -70), Vector2(62, -92), cel, 9, true)
+	draw_line(Vector2(62, -92), Vector2(84, -76), cel, 7, true)
+	draw_arc(Vector2(84, -76), 15, 0, TAU, 36, Color(0.68, 0.90, 1.0, 0.75), 2.5, true)
+	draw_circle(Vector2(84, -76), 7, Color(0.58, 0.86, 1.0, 0.65))
+
+	draw_circle(Vector2(0, -106), 23, celb)
+
+	for i in 5:
+		var cx := -16.0 + float(i) * 8.0
+		var ch  :=  8.0 + (2.0 - absf(float(i) - 2.0)) * 5.0
+		draw_polygon(
+			PackedVector2Array([
+				Vector2(cx - 3, -128),
+				Vector2(cx + 3, -128),
+				Vector2(cx, -128 - ch),
+			]),
+			PackedColorArray([gold])
+		)
+
+	draw_circle(Vector2(-9, -109), 4, gold)
+	draw_circle(Vector2(9,  -109), 4, gold)
+	draw_circle(Vector2(-9, -109), 2, Color(1.0, 1.0, 1.0))
+	draw_circle(Vector2(9,  -109), 2, Color(1.0, 1.0, 1.0))
+
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 888
+	for i in 12:
+		var angle := rng.randf_range(0, TAU)
+		var dist  := rng.randf_range(56, 82)
+		var pos   := Vector2(cos(angle) * dist, sin(angle) * dist - 80)
+		draw_circle(pos, rng.randf_range(2, 5), Color(0.70, 0.90, 1.0, rng.randf_range(0.28, 0.65)))
+
+	draw_arc(Vector2(0, -106), 23, 0, TAU, 52, Color(0.80, 0.96, 1.0, 0.85), 1.5, true)
+
+# ── Helpers ────────────────────────────────────────────────────────────────────
 func _ellipse(center: Vector2, rx: float, ry: float, col: Color) -> void:
 	var pts := PackedVector2Array()
 	for i in 24:
-		var a := i * TAU / 24.0
+		var a := float(i) * TAU / 24.0
 		pts.append(center + Vector2(cos(a) * rx, sin(a) * ry))
 	draw_polygon(pts, PackedColorArray([col]))
 
