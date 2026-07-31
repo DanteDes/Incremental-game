@@ -1,5 +1,11 @@
 extends Node2D
 
+var _time: float = 0.0
+
+func _process(delta: float) -> void:
+	_time += delta
+	queue_redraw()
+
 func _draw() -> void:
 	var vp = get_viewport_rect().size
 	_draw_sky(vp)
@@ -16,8 +22,9 @@ func _draw_sky(vp: Vector2) -> void:
 		var t := float(i) / steps
 		var col := Color(0.03, 0.05, 0.16).lerp(Color(0.22, 0.36, 0.55), t)
 		draw_rect(Rect2(0, i * h, vp.x, h + 1.0), col)
-	# Horizon glow
-	draw_rect(Rect2(0, vp.y * 0.6, vp.x, vp.y * 0.1), Color(0.42, 0.52, 0.65, 0.25))
+	# Horizon glow — breathes slowly
+	var glow_a := 0.2 + 0.05 * sin(_time * 0.4)
+	draw_rect(Rect2(0, vp.y * 0.6, vp.x, vp.y * 0.1), Color(0.42, 0.52, 0.65, glow_a))
 
 func _draw_stars(vp: Vector2) -> void:
 	var rng := RandomNumberGenerator.new()
@@ -26,12 +33,20 @@ func _draw_stars(vp: Vector2) -> void:
 		var x := rng.randf_range(5, vp.x - 5)
 		var y := rng.randf_range(5, vp.y * 0.55)
 		var r := rng.randf_range(0.7, 2.2)
-		var a := rng.randf_range(0.35, 1.0)
+		var base_a := rng.randf_range(0.35, 1.0)
+		# Each star has a unique phase so they don't all pulse together
+		var phase := rng.randf_range(0.0, TAU)
+		var speed := rng.randf_range(0.5, 1.8)
+		var a := base_a * (0.6 + 0.4 * sin(_time * speed + phase))
 		draw_circle(Vector2(x, y), r, Color(1, 1, 1, a))
 
 func _draw_moon(vp: Vector2) -> void:
 	var pos := Vector2(vp.x * 0.83, vp.y * 0.11)
-	draw_circle(pos, 50, Color(0.9, 0.88, 0.65, 0.1))
+	# Outer halo pulses gently
+	var halo_r := 50.0 + 2.5 * sin(_time * 0.6)
+	var halo_a := 0.08 + 0.04 * sin(_time * 0.6)
+	draw_circle(pos, halo_r + 8, Color(0.9, 0.88, 0.65, halo_a * 0.5))
+	draw_circle(pos, halo_r,     Color(0.9, 0.88, 0.65, halo_a))
 	draw_circle(pos, 42, Color(0.92, 0.9, 0.7, 0.18))
 	draw_circle(pos, 34, Color(0.96, 0.94, 0.8))
 	# Craters
