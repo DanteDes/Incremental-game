@@ -26,6 +26,14 @@ func test_non_air_stage_gold_floors_at_one():
 	state.punch()
 	assert_eq(state.gold, 1)
 
+func test_earth_element_applies_gold_multiplier():
+	state._apply_stage(GameStateScript.Stage.HAY)
+	state.strength = 40.0
+	state.technique = 0.0
+	state.elements[2] = true
+	state.punch()
+	assert_eq(state.gold, 12)
+
 func test_destroying_target_adds_stage_bonus_gold():
 	state._apply_stage(GameStateScript.Stage.HAY)
 	state.strength = 999999.0
