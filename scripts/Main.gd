@@ -5,6 +5,10 @@ var _punch_timer: float = 0.0
 # Visual nodes
 var _player_node: Node2D   # DrawPlayer
 var _target_node: Node2D   # DrawTarget
+var _player_home: Vector2
+var _target_home: Vector2
+var _tween_player: Tween
+var _tween_target: Tween
 var _damage_container: Control
 var _hp_bar: ProgressBar
 var _hp_title_lbl: Label
@@ -44,12 +48,14 @@ func _build_scene() -> void:
 
 	# Player character
 	_player_node = load("res://scripts/DrawPlayer.gd").new()
-	_player_node.position = Vector2(vp.x * 0.3, vp.y * 0.68)
+	_player_home = Vector2(vp.x * 0.3, vp.y * 0.68)
+	_player_node.position = _player_home
 	add_child(_player_node)
 
 	# Target (self-manages redraws via GameState signal)
 	_target_node = load("res://scripts/DrawTarget.gd").new()
-	_target_node.position = Vector2(vp.x * 0.68, vp.y * 0.68)
+	_target_home = Vector2(vp.x * 0.68, vp.y * 0.68)
+	_target_node.position = _target_home
 	add_child(_target_node)
 
 	# UI layer
@@ -275,19 +281,20 @@ func _spawn_damage(dmg: float, is_crit: bool) -> void:
 	tw.tween_callback(lbl.queue_free)
 
 func _animate_punch() -> void:
-	# Player moves forward + arm extends
-	var orig_p := _player_node.position
-	_player_node.punch_anim()
-	var tw_p := create_tween()
-	tw_p.tween_property(_player_node, "position", orig_p + Vector2(22, -4), 0.06)
-	tw_p.tween_property(_player_node, "position", orig_p, 0.12)
+	if _tween_player:
+		_tween_player.kill()
+	if _tween_target:
+		_tween_target.kill()
 
-	# Target shakes
-	var orig_t := _target_node.position
-	var tw_t := create_tween()
-	tw_t.tween_property(_target_node, "position", orig_t + Vector2(10, 0),  0.04)
-	tw_t.tween_property(_target_node, "position", orig_t + Vector2(-6, 0),  0.04)
-	tw_t.tween_property(_target_node, "position", orig_t,                   0.04)
+	_player_node.punch_anim()
+	_tween_player = create_tween()
+	_tween_player.tween_property(_player_node, "position", _player_home + Vector2(22, -4), 0.06)
+	_tween_player.tween_property(_player_node, "position", _player_home, 0.12)
+
+	_tween_target = create_tween()
+	_tween_target.tween_property(_target_node, "position", _target_home + Vector2(10, 0),  0.04)
+	_tween_target.tween_property(_target_node, "position", _target_home + Vector2(-6, 0),  0.04)
+	_tween_target.tween_property(_target_node, "position", _target_home,                   0.04)
 
 # ── UI Updates ─────────────────────────────────────────────────────────────────
 
