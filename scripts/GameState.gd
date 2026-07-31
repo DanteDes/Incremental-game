@@ -38,6 +38,26 @@ signal skill_tree_unlocked_signal()
 
 func _ready() -> void:
 	_apply_stage(Stage.AIR)
+	_apply_debug_cli_args()
+
+# Debug-only startup overrides, e.g. `godot . -- --gold=500 --stage=2 --skill_tree`
+func _apply_debug_cli_args() -> void:
+	for arg in OS.get_cmdline_user_args():
+		if not arg.begins_with("--"):
+			continue
+		var parts := arg.trim_prefix("--").split("=", true, 1)
+		var key := parts[0]
+		var value := parts[1] if parts.size() > 1 else ""
+		match key:
+			"gold":
+				gold = value.to_int()
+				gold_changed.emit(gold)
+			"stage":
+				_apply_stage(clampi(value.to_int(), Stage.AIR, Stage.SENSEI))
+			"skill_tree":
+				skill_tree_unlocked = true
+				skill_tree_unlocked_signal.emit()
+				stats_changed.emit()
 
 func _apply_stage(s: int) -> void:
 	stage = s
