@@ -56,20 +56,27 @@ func _draw_moon(vp: Vector2) -> void:
 	draw_circle(pos + Vector2(12, -12), 3.0, Color(0.88, 0.86, 0.7))
 
 func _draw_mountains(vp: Vector2) -> void:
+	# Parallax offset — far layer moves least, near layer moves most
+	var mouse := get_viewport().get_mouse_position()
+	var mx := (mouse.x / vp.x - 0.5) * 2.0  # -1..1
+	var off_far  := mx * 8.0
+	var off_near := mx * 18.0
+	var off_pine := mx * 28.0
+
 	# Far range — blue-grey
 	var far := PackedVector2Array([
-		Vector2(0, vp.y * 0.68),
-		Vector2(0, vp.y * 0.5),
-		Vector2(vp.x * 0.08, vp.y * 0.28),
-		Vector2(vp.x * 0.18, vp.y * 0.43),
-		Vector2(vp.x * 0.28, vp.y * 0.22),
-		Vector2(vp.x * 0.38, vp.y * 0.38),
-		Vector2(vp.x * 0.5,  vp.y * 0.17),
-		Vector2(vp.x * 0.62, vp.y * 0.34),
-		Vector2(vp.x * 0.73, vp.y * 0.2),
-		Vector2(vp.x * 0.84, vp.y * 0.32),
-		Vector2(vp.x,        vp.y * 0.42),
-		Vector2(vp.x,        vp.y * 0.68),
+		Vector2(0 + off_far,          vp.y * 0.68),
+		Vector2(0 + off_far,          vp.y * 0.5),
+		Vector2(vp.x * 0.08 + off_far, vp.y * 0.28),
+		Vector2(vp.x * 0.18 + off_far, vp.y * 0.43),
+		Vector2(vp.x * 0.28 + off_far, vp.y * 0.22),
+		Vector2(vp.x * 0.38 + off_far, vp.y * 0.38),
+		Vector2(vp.x * 0.5  + off_far, vp.y * 0.17),
+		Vector2(vp.x * 0.62 + off_far, vp.y * 0.34),
+		Vector2(vp.x * 0.73 + off_far, vp.y * 0.2),
+		Vector2(vp.x * 0.84 + off_far, vp.y * 0.32),
+		Vector2(vp.x        + off_far, vp.y * 0.42),
+		Vector2(vp.x        + off_far, vp.y * 0.68),
 	])
 	draw_polygon(far, PackedColorArray([Color(0.17, 0.21, 0.34)]))
 
@@ -81,7 +88,7 @@ func _draw_mountains(vp: Vector2) -> void:
 		[vp.x * 0.73, vp.y * 0.2,   vp.x * 0.048],
 	]
 	for p in peaks:
-		var pk := Vector2(p[0], p[1])
+		var pk := Vector2(p[0] + off_far, p[1])
 		var sz: float = p[2]
 		draw_polygon(
 			PackedVector2Array([pk, pk + Vector2(-sz, sz * 1.6), pk + Vector2(sz, sz * 1.6)]),
@@ -90,23 +97,23 @@ func _draw_mountains(vp: Vector2) -> void:
 
 	# Near range — darker silhouette
 	var near := PackedVector2Array([
-		Vector2(0, vp.y * 0.68),
-		Vector2(0, vp.y * 0.58),
-		Vector2(vp.x * 0.12, vp.y * 0.42),
-		Vector2(vp.x * 0.22, vp.y * 0.53),
-		Vector2(vp.x * 0.35, vp.y * 0.37),
-		Vector2(vp.x * 0.48, vp.y * 0.51),
-		Vector2(vp.x * 0.6,  vp.y * 0.38),
-		Vector2(vp.x * 0.74, vp.y * 0.54),
-		Vector2(vp.x * 0.88, vp.y * 0.4),
-		Vector2(vp.x,        vp.y * 0.53),
-		Vector2(vp.x,        vp.y * 0.68),
+		Vector2(0 + off_near,          vp.y * 0.68),
+		Vector2(0 + off_near,          vp.y * 0.58),
+		Vector2(vp.x * 0.12 + off_near, vp.y * 0.42),
+		Vector2(vp.x * 0.22 + off_near, vp.y * 0.53),
+		Vector2(vp.x * 0.35 + off_near, vp.y * 0.37),
+		Vector2(vp.x * 0.48 + off_near, vp.y * 0.51),
+		Vector2(vp.x * 0.6  + off_near, vp.y * 0.38),
+		Vector2(vp.x * 0.74 + off_near, vp.y * 0.54),
+		Vector2(vp.x * 0.88 + off_near, vp.y * 0.4),
+		Vector2(vp.x        + off_near, vp.y * 0.53),
+		Vector2(vp.x        + off_near, vp.y * 0.68),
 	])
 	draw_polygon(near, PackedColorArray([Color(0.09, 0.12, 0.19)]))
 
 	# Pine tree silhouette row
 	for i in 20:
-		var tx := (float(i) / 19.0) * vp.x * 0.92 + vp.x * 0.04
+		var tx := (float(i) / 19.0) * vp.x * 0.92 + vp.x * 0.04 + off_pine
 		_draw_pine(tx, vp.y * 0.645, 0.55)
 
 func _draw_pine(x: float, y: float, sc: float) -> void:
