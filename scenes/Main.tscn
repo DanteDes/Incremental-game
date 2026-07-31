@@ -1,6 +1,194 @@
-[gd_scene load_steps=2 format=3 uid="uid://c1main01abc"]
+[gd_scene load_steps=4 format=3]
 
-[ext_resource type="Script" path="res://scripts/Main.gd" id="1_main01"]
+[ext_resource type="Script" path="res://scripts/Main.gd" id="1_main"]
+[ext_resource type="Theme" path="res://resources/GameTheme.tres" id="2_theme"]
+[ext_resource type="PackedScene" path="res://scenes/components/UpgradeRow.tscn" id="3_row"]
 
 [node name="Main" type="Node2D"]
-script = ExtResource("1_main01")
+script = ExtResource("1_main")
+
+[node name="UILayer" type="CanvasLayer" parent="."]
+layer = 2
+
+[node name="UIRoot" type="Control" parent="UILayer"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("2_theme")
+
+[node name="MainLayout" type="HBoxContainer" parent="UILayer/UIRoot"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="UpgradePanel" type="PanelContainer" parent="UILayer/UIRoot/MainLayout"]
+layout_mode = 2
+custom_minimum_size = Vector2(260, 0)
+
+[node name="UpgradeMargin" type="MarginContainer" parent="UILayer/UIRoot/MainLayout/UpgradePanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 14
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 10
+
+[node name="UpgradeVBox" type="VBoxContainer" parent="UILayer/UIRoot/MainLayout/UpgradePanel/UpgradeMargin"]
+layout_mode = 2
+theme_override_constants/separation = 5
+
+[node name="UpgradeTitle" type="Label" parent="UILayer/UIRoot/MainLayout/UpgradePanel/UpgradeMargin/UpgradeVBox"]
+layout_mode = 2
+theme_type_variation = &"SectionTitle"
+horizontal_alignment = 1
+text = "MEJORAS"
+
+[node name="HSeparator" type="HSeparator" parent="UILayer/UIRoot/MainLayout/UpgradePanel/UpgradeMargin/UpgradeVBox"]
+layout_mode = 2
+
+[node name="StrRow" parent="UILayer/UIRoot/MainLayout/UpgradePanel/UpgradeMargin/UpgradeVBox" instance=ExtResource("3_row")]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="SpdRow" parent="UILayer/UIRoot/MainLayout/UpgradePanel/UpgradeMargin/UpgradeVBox" instance=ExtResource("3_row")]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="TecRow" parent="UILayer/UIRoot/MainLayout/UpgradePanel/UpgradeMargin/UpgradeVBox" instance=ExtResource("3_row")]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="HSeparator2" type="HSeparator" parent="UILayer/UIRoot/MainLayout/UpgradePanel/UpgradeMargin/UpgradeVBox"]
+layout_mode = 2
+
+[node name="SkillSection" type="VBoxContainer" parent="UILayer/UIRoot/MainLayout/UpgradePanel/UpgradeMargin/UpgradeVBox"]
+unique_name_in_owner = true
+layout_mode = 2
+visible = false
+theme_override_constants/separation = 5
+
+[node name="SkillLabel" type="Label" parent="UILayer/UIRoot/MainLayout/UpgradePanel/UpgradeMargin/UpgradeVBox/SkillSection"]
+layout_mode = 2
+theme_type_variation = &"GoldLabel"
+horizontal_alignment = 1
+text = "SKILL TREE"
+
+[node name="SkillHint" type="Label" parent="UILayer/UIRoot/MainLayout/UpgradePanel/UpgradeMargin/UpgradeVBox/SkillSection"]
+layout_mode = 2
+theme_type_variation = &"HintLabel"
+horizontal_alignment = 1
+text = "Desbloqueado al romper la Piedra"
+
+[node name="EleRow" parent="UILayer/UIRoot/MainLayout/UpgradePanel/UpgradeMargin/UpgradeVBox/SkillSection" instance=ExtResource("3_row")]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="KiRow" parent="UILayer/UIRoot/MainLayout/UpgradePanel/UpgradeMargin/UpgradeVBox/SkillSection" instance=ExtResource("3_row")]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="CenterColumn" type="VBoxContainer" parent="UILayer/UIRoot/MainLayout"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="TopBarMargin" type="MarginContainer" parent="UILayer/UIRoot/MainLayout/CenterColumn"]
+layout_mode = 2
+size_flags_vertical = 0
+theme_override_constants/margin_top = 10
+
+[node name="TopBarVBox" type="VBoxContainer" parent="UILayer/UIRoot/MainLayout/CenterColumn/TopBarMargin"]
+layout_mode = 2
+theme_override_constants/separation = 2
+
+[node name="HPTitleLabel" type="Label" parent="UILayer/UIRoot/MainLayout/CenterColumn/TopBarMargin/TopBarVBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 15
+horizontal_alignment = 1
+text = "Calentando motores..."
+
+[node name="HPBar" type="ProgressBar" parent="UILayer/UIRoot/MainLayout/CenterColumn/TopBarMargin/TopBarVBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 24)
+layout_mode = 2
+max_value = 1.0
+value = 1.0
+show_percentage = false
+
+[node name="InfoPanel" type="PanelContainer" parent="UILayer/UIRoot/MainLayout"]
+layout_mode = 2
+custom_minimum_size = Vector2(225, 0)
+
+[node name="InfoMargin" type="MarginContainer" parent="UILayer/UIRoot/MainLayout/InfoPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 14
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 10
+
+[node name="InfoVBox" type="VBoxContainer" parent="UILayer/UIRoot/MainLayout/InfoPanel/InfoMargin"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="InfoTitle" type="Label" parent="UILayer/UIRoot/MainLayout/InfoPanel/InfoMargin/InfoVBox"]
+layout_mode = 2
+theme_type_variation = &"SectionTitle"
+horizontal_alignment = 1
+text = "ESTADO"
+
+[node name="HSeparator3" type="HSeparator" parent="UILayer/UIRoot/MainLayout/InfoPanel/InfoMargin/InfoVBox"]
+layout_mode = 2
+
+[node name="GoldLabel" type="Label" parent="UILayer/UIRoot/MainLayout/InfoPanel/InfoMargin/InfoVBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"GoldLabel"
+text = "Oro: 0"
+
+[node name="HSeparator4" type="HSeparator" parent="UILayer/UIRoot/MainLayout/InfoPanel/InfoMargin/InfoVBox"]
+layout_mode = 2
+
+[node name="TargetNameLabel" type="Label" parent="UILayer/UIRoot/MainLayout/InfoPanel/InfoMargin/InfoVBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+
+[node name="TargetHpLabel" type="Label" parent="UILayer/UIRoot/MainLayout/InfoPanel/InfoMargin/InfoVBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+
+[node name="HSeparator5" type="HSeparator" parent="UILayer/UIRoot/MainLayout/InfoPanel/InfoMargin/InfoVBox"]
+layout_mode = 2
+
+[node name="StatsTitle" type="Label" parent="UILayer/UIRoot/MainLayout/InfoPanel/InfoMargin/InfoVBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "ESTADÍSTICAS"
+
+[node name="StrValLabel" type="Label" parent="UILayer/UIRoot/MainLayout/InfoPanel/InfoMargin/InfoVBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+
+[node name="SpdValLabel" type="Label" parent="UILayer/UIRoot/MainLayout/InfoPanel/InfoMargin/InfoVBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+
+[node name="TecValLabel" type="Label" parent="UILayer/UIRoot/MainLayout/InfoPanel/InfoMargin/InfoVBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+
+[node name="DamageLayer" type="Control" parent="UILayer/UIRoot"]
+unique_name_in_owner = true
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
