@@ -25,6 +25,7 @@ var _tween_target: Tween
 var _mat_player: ShaderMaterial
 var _mat_target: ShaderMaterial
 var _mat_vignette: ShaderMaterial
+var _tint_current: Color = Color(0.03, 0.05, 0.12)
 
 const STAGE_TINTS: Array[Color] = [
 	Color(0.03, 0.05, 0.12),  # 0  Air        — night blue (default)
@@ -286,11 +287,13 @@ func _on_stage_changed(s: int) -> void:
 func _transition_stage_tint(s: int) -> void:
 	if s < 0 or s >= STAGE_TINTS.size(): return
 	var target := STAGE_TINTS[s]
+	var from := _tint_current
 	var tw := create_tween()
 	tw.tween_method(
-		func(c: Color): _mat_vignette.set_shader_parameter("tint_color", Vector3(c.r, c.g, c.b)),
-		Color(_mat_vignette.get_shader_parameter("tint_color")),
-		target, 1.5
+		func(c: Color):
+			_tint_current = c
+			_mat_vignette.set_shader_parameter("tint_color", Vector3(c.r, c.g, c.b)),
+		from, target, 1.5
 	)
 
 func _on_gold_changed(_g: int) -> void:
