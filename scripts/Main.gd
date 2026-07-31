@@ -25,6 +25,7 @@ var _tween_target: Tween
 var _mat_player: ShaderMaterial
 var _mat_target: ShaderMaterial
 var _mat_vignette: ShaderMaterial
+var _mat_clouds:   ShaderMaterial
 var _tint_current: Color = Color(0.03, 0.05, 0.12)
 
 const STAGE_TINTS: Array[Color] = [
@@ -119,6 +120,16 @@ func _build_scene() -> void:
 	var vignette_layer := CanvasLayer.new()
 	vignette_layer.layer = 1
 	add_child(vignette_layer)
+
+	# Cloud layer — renders below vignette, above the drawn background
+	var cloud_rect := ColorRect.new()
+	cloud_rect.set_anchors_preset(Control.PRESET_FULL_RECT)
+	cloud_rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_mat_clouds = ShaderMaterial.new()
+	_mat_clouds.shader = load("res://shaders/bg_clouds.gdshader")
+	cloud_rect.material = _mat_clouds
+	vignette_layer.add_child(cloud_rect)
+
 	var vignette_rect := ColorRect.new()
 	vignette_rect.set_anchors_preset(Control.PRESET_FULL_RECT)
 	vignette_rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
