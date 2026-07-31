@@ -3,23 +3,27 @@ extends Node
 enum Stage {
 	AIR = 0, HAY = 1, TREE = 2, STONE = 3,
 	WATERFALL = 4, VOLCANO = 5, MOUNTAIN = 6, TYPHOON = 7,
-	SENSEI = 8, SPIRIT_WOLF = 9, DRAGON = 10, WIND_GOD = 11
+	SENSEI = 8, SPIRIT_WOLF = 9, DRAGON = 10,
+	AMATERASU = 11, SUSANOO = 12, IZANAGI_IZANAMI = 13
 }
 
 const STAGE_NAMES = [
 	"el Aire", "el Rollo de Paja", "el Árbol", "la Piedra",
 	"la Cascada", "el Volcán", "la Montaña", "el Tifón",
-	"el Sensei", "el Lobo Espíritu", "el Dragón Ancestral", "el Dios del Viento"
+	"el Sensei", "el Lobo Espíritu", "el Dragón Ancestral",
+	"Amaterasu", "Susanoo", "Izanagi e Izanami"
 ]
 const STAGE_HP = [
-	INF,     100.0,   500.0,   3000.0,
-	INF,     INF,     INF,     INF,
-	50000.0, 150000.0, 600000.0, 2500000.0
+	INF,     100.0,    500.0,    3000.0,
+	INF,     INF,      INF,      INF,
+	50000.0, 150000.0, 600000.0,
+	2000000.0, 8000000.0, 30000000.0
 ]
 const STAGE_BONUS = [
-	0,     60,    250,   1000,
-	0,     3000,  10000, 0,
-	20000, 80000, 300000, 1000000
+	0,      60,     250,     1000,
+	0,      3000,   10000,   0,
+	20000,  80000,  300000,
+	1000000, 5000000, 20000000
 ]
 
 const AIR_PUNCHES_TO_ADVANCE      = 25
@@ -118,14 +122,14 @@ func punch(combo_mult: float = 1.0) -> Dictionary:
 			if typhoon_punches >= TYPHOON_PUNCHES_TO_ADVANCE:
 				_unlock_element(3)
 				_apply_stage(Stage.SENSEI)
-		Stage.WIND_GOD:
+		Stage.IZANAGI_IZANAMI:
 			if not game_complete:
 				target_hp = maxf(0.0, target_hp - dmg)
 				if target_hp == 0.0:
 					game_complete = true
-					gold += STAGE_BONUS[Stage.WIND_GOD]
+					gold += STAGE_BONUS[Stage.IZANAGI_IZANAMI]
 					gold_changed.emit(gold)
-					stage_changed.emit(Stage.WIND_GOD)
+					stage_changed.emit(Stage.IZANAGI_IZANAMI)
 		_:
 			target_hp = maxf(0.0, target_hp - dmg)
 			if target_hp == 0.0:

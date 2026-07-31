@@ -392,7 +392,7 @@ func _animate_punch() -> void:
 
 func _update_hp_display() -> void:
 	if GameState.game_complete:
-		_hp_title_lbl.text = "¡LEYENDA! Venciste al Dios del Viento"
+		_hp_title_lbl.text = "¡LEYENDA! Venciste a Izanagi e Izanami"
 		_hp_bar.visible = false
 		_target_name_lbl.text = "El cosmos te reconoce."
 		_target_hp_lbl.text = "No hay más adversarios."

@@ -24,7 +24,9 @@ func _draw() -> void:
 		8:  _draw_sensei()
 		9:  _draw_spirit_wolf()
 		10: _draw_dragon()
-		11: _draw_wind_god()
+		11: _draw_amaterasu()
+		12: _draw_susanoo()
+		13: _draw_izanagi_izanami()
 
 # ── Stage 0 — Air ─────────────────────────────────────────────────────────────
 func _draw_air() -> void:
@@ -549,6 +551,249 @@ func _draw_wind_god() -> void:
 		draw_circle(pos, rng.randf_range(2, 5), Color(0.70, 0.90, 1.0, rng.randf_range(0.28, 0.65)))
 
 	draw_arc(Vector2(0, -106), 23, 0, TAU, 52, Color(0.80, 0.96, 1.0, 0.85), 1.5, true)
+
+# ── Stage 11 — Amaterasu ──────────────────────────────────────────────────────
+func _draw_amaterasu() -> void:
+	var gold  := Color(1.0,  0.88, 0.30)
+	var white := Color(1.0,  0.97, 0.88)
+	var skin  := Color(0.94, 0.82, 0.68)
+
+	# Sun disc rays
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 77
+	for i in 16:
+		var a  := float(i) * TAU / 16.0
+		var r1 := 48.0
+		var r2 := 48.0 + rng.randf_range(18, 38)
+		draw_line(
+			Vector2(cos(a) * r1, sin(a) * r1 - 90),
+			Vector2(cos(a) * r2, sin(a) * r2 - 90),
+			Color(1.0, 0.92, 0.4, 0.7), rng.randf_range(1.5, 3.5), true
+		)
+
+	# Sun disc
+	_ellipse(Vector2(0, -90), 52, 52, Color(1.0, 0.82, 0.1, 0.18))
+	_ellipse(Vector2(0, -90), 44, 44, Color(1.0, 0.88, 0.2, 0.28))
+	_ellipse(Vector2(0, -90), 36, 36, Color(1.0, 0.92, 0.35, 0.45))
+
+	# Flowing robe
+	draw_polygon(PackedVector2Array([
+		Vector2(-38, -28), Vector2(38, -28),
+		Vector2(52, 8), Vector2(28, 5), Vector2(0, 14), Vector2(-28, 5), Vector2(-52, 8),
+	]), PackedColorArray([Color(0.95, 0.88, 0.62, 0.92)]))
+
+	# Body
+	draw_polygon(PackedVector2Array([
+		Vector2(-20, -78), Vector2(20, -78),
+		Vector2(26, -36), Vector2(-26, -36),
+	]), PackedColorArray([Color(0.92, 0.82, 0.55)]))
+
+	# Arms — graceful, raised
+	draw_line(Vector2(-20, -68), Vector2(-55, -78), skin, 8, true)
+	draw_line(Vector2(-55, -78), Vector2(-70, -62), skin, 7, true)
+	draw_circle(Vector2(-70, -62), 10, gold)  # sun orb in hand
+
+	draw_line(Vector2(20, -68), Vector2(55, -78), skin, 8, true)
+	draw_line(Vector2(55, -78), Vector2(70, -62), skin, 7, true)
+	draw_circle(Vector2(70, -62), 10, gold)
+
+	# Head
+	draw_circle(Vector2(0, -105), 22, skin)
+
+	# Hair — black, flowing
+	draw_arc(Vector2(0, -105), 22, PI * 0.6, PI * 2.4, 28, Color(0.08, 0.05, 0.06), 7, true)
+	draw_line(Vector2(-18, -112), Vector2(-26, -140), Color(0.08, 0.05, 0.06), 5, true)
+	draw_line(Vector2(18,  -112), Vector2(26,  -140), Color(0.08, 0.05, 0.06), 5, true)
+
+	# Crown
+	for i in 5:
+		var cx := -12.0 + float(i) * 6.0
+		draw_polygon(PackedVector2Array([
+			Vector2(cx - 3, -127), Vector2(cx + 3, -127), Vector2(cx, -136),
+		]), PackedColorArray([gold]))
+	draw_rect(Rect2(-16, -128, 32, 5), gold)
+
+	# Eyes — serene
+	draw_circle(Vector2(-8,  -107), 3, Color(0.12, 0.08, 0.06))
+	draw_circle(Vector2(8,   -107), 3, Color(0.12, 0.08, 0.06))
+	draw_line(Vector2(-12, -105), Vector2(-4, -106), Color(0.12, 0.08, 0.06), 1.5)
+	draw_line(Vector2(4,   -106), Vector2(12, -105), Color(0.12, 0.08, 0.06), 1.5)
+
+	# Outer glow
+	draw_arc(Vector2(0, -90), 52, 0, TAU, 64, Color(1.0, 0.95, 0.5, 0.5), 1.5, true)
+
+# ── Stage 12 — Susanoo ────────────────────────────────────────────────────────
+func _draw_susanoo() -> void:
+	var skin   := Color(0.78, 0.64, 0.50)
+	var armor  := Color(0.14, 0.18, 0.32)
+	var armord := Color(0.08, 0.10, 0.20)
+	var light  := Color(0.55, 0.70, 1.0)
+
+	# Storm aura
+	_ellipse(Vector2(0, -70), 85, 90, Color(0.15, 0.22, 0.55, 0.10))
+	_ellipse(Vector2(0, -70), 68, 72, Color(0.20, 0.30, 0.65, 0.16))
+
+	# Lightning bolts around body
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 42
+	for i in 6:
+		var a  := float(i) * TAU / 6.0 + rng.randf_range(-0.3, 0.3)
+		var r1 := rng.randf_range(55, 65)
+		var r2 := rng.randf_range(72, 85)
+		var p1 := Vector2(cos(a) * r1, sin(a) * r1 - 70)
+		var p2 := Vector2(cos(a) * r2, sin(a) * r2 - 70)
+		var pm := (p1 + p2) / 2.0 + Vector2(rng.randf_range(-8, 8), rng.randf_range(-8, 8))
+		draw_line(p1, pm, Color(0.7, 0.85, 1.0, 0.8), 2, true)
+		draw_line(pm, p2, Color(0.7, 0.85, 1.0, 0.8), 2, true)
+
+	# Legs — wide battle stance
+	draw_polygon(_trapezoid(Vector2(-14, -24), 10, 8, 34), PackedColorArray([armord]))
+	draw_polygon(_trapezoid(Vector2(14,  -24), 10, 8, 34), PackedColorArray([armord]))
+	draw_rect(Rect2(-17, 8, 16, 10), Color(0.06, 0.06, 0.10))
+	draw_rect(Rect2(4,   8, 16, 10), Color(0.06, 0.06, 0.10))
+
+	# Body armor
+	draw_polygon(PackedVector2Array([
+		Vector2(-22, -70), Vector2(22, -70),
+		Vector2(18, -22),  Vector2(-18, -22),
+	]), PackedColorArray([armor]))
+	draw_polygon(PackedVector2Array([
+		Vector2(0, -70), Vector2(22, -70),
+		Vector2(18, -22), Vector2(0, -22),
+	]), PackedColorArray([armord]))
+	# Armor details
+	draw_line(Vector2(-20, -55), Vector2(20, -55), Color(0.35, 0.45, 0.72), 2)
+	draw_line(Vector2(-18, -40), Vector2(18, -40), Color(0.35, 0.45, 0.72), 1.5)
+	draw_rect(Rect2(-10, -68, 20, 8), Color(0.30, 0.40, 0.68))
+
+	# Left arm — guard
+	draw_line(Vector2(-22, -62), Vector2(-42, -50), skin, 10, true)
+	draw_line(Vector2(-42, -50), Vector2(-36, -30), skin, 9, true)
+	draw_circle(Vector2(-36, -30), 8, skin)
+
+	# Right arm — holding Kusanagi (sword)
+	draw_line(Vector2(22, -62), Vector2(42, -54), skin, 10, true)
+	draw_circle(Vector2(42, -54), 8, skin)
+	# Sword
+	draw_line(Vector2(48, -58), Vector2(90, -110), Color(0.75, 0.85, 1.0), 3, true)
+	draw_line(Vector2(50, -56), Vector2(92, -108), Color(1.0, 1.0, 1.0, 0.7), 1, true)
+	draw_rect(Rect2(44, -62, 12, 6), Color(0.5, 0.4, 0.2))  # guard
+
+	# Head
+	draw_circle(Vector2(0, -86), 22, skin)
+	# Dark hair — wild
+	draw_arc(Vector2(0, -86), 22, PI * 0.5, PI * 2.5, 28, Color(0.06, 0.04, 0.06), 8, true)
+	for i in 5:
+		var hx := -18.0 + float(i) * 9.0
+		draw_line(Vector2(hx, -106), Vector2(hx + rng.randf_range(-4, 4), -118),
+				  Color(0.06, 0.04, 0.06), 3, true)
+
+	# Eyes — fierce, glowing
+	draw_circle(Vector2(-9, -88), 4, light)
+	draw_circle(Vector2(9,  -88), 4, light)
+	draw_circle(Vector2(-9, -88), 2, Color(0.1, 0.2, 0.6))
+	draw_circle(Vector2(9,  -88), 2, Color(0.1, 0.2, 0.6))
+	draw_line(Vector2(-14, -92), Vector2(-4, -90), Color(0.04, 0.03, 0.05), 2.5, true)
+	draw_line(Vector2(4,   -90), Vector2(14, -92), Color(0.04, 0.03, 0.05), 2.5, true)
+
+	# Mouth — battle cry
+	draw_line(Vector2(-7, -78), Vector2(7, -78), Color(0.55, 0.35, 0.30), 2)
+
+# ── Stage 13 — Izanagi & Izanami ──────────────────────────────────────────────
+func _draw_izanagi_izanami() -> void:
+	# ── Izanagi (left — light, life) ──────────────────────────────────────────
+	var skin_i  := Color(0.90, 0.80, 0.65)
+	var robe_i  := Color(0.88, 0.88, 1.0)
+	var robe_id := Color(0.66, 0.66, 0.88)
+	var gold_i  := Color(1.0,  0.88, 0.30)
+
+	# Izanagi aura
+	_ellipse(Vector2(-36, -80), 48, 58, Color(0.9, 0.95, 1.0, 0.10))
+
+	# Body
+	draw_polygon(PackedVector2Array([
+		Vector2(-58, -28), Vector2(-18, -28),
+		Vector2(-14, -75), Vector2(-56, -75),
+	]), PackedColorArray([robe_i]))
+	draw_polygon(PackedVector2Array([
+		Vector2(-38, -75), Vector2(-18, -75),
+		Vector2(-14, -28), Vector2(-38, -28),
+	]), PackedColorArray([robe_id]))
+
+	# Izanagi arms
+	draw_line(Vector2(-56, -68), Vector2(-78, -56), skin_i, 8, true)
+	draw_circle(Vector2(-78, -56), 7, skin_i)
+	draw_line(Vector2(-18, -68), Vector2(-8,  -54), skin_i, 8, true)
+	draw_circle(Vector2(-8,  -54), 7, skin_i)
+
+	# Izanagi spear (Amenonuhoko)
+	draw_line(Vector2(-78, -60), Vector2(-90, -140), Color(0.78, 0.70, 0.40), 3, true)
+	draw_polygon(PackedVector2Array([
+		Vector2(-90, -140), Vector2(-95, -152), Vector2(-85, -152),
+	]), PackedColorArray([gold_i]))
+
+	# Izanagi head
+	draw_circle(Vector2(-36, -95), 20, skin_i)
+	draw_arc(Vector2(-36, -95), 20, PI * 0.7, PI * 2.3, 24, Color(0.85, 0.80, 0.5), 6, true)
+	draw_circle(Vector2(-36, -113), 5, Color(0.85, 0.80, 0.5))
+	draw_circle(Vector2(-28, -97), 3, Color(0.10, 0.08, 0.06))
+	draw_circle(Vector2(-44, -97), 3, Color(0.10, 0.08, 0.06))
+
+	# ── Izanami (right — dark, death) ─────────────────────────────────────────
+	var skin_n  := Color(0.55, 0.45, 0.48)
+	var robe_n  := Color(0.18, 0.10, 0.22)
+	var robe_nd := Color(0.10, 0.06, 0.14)
+	var purple  := Color(0.60, 0.20, 0.80)
+
+	# Izanami aura
+	_ellipse(Vector2(36, -80), 48, 58, Color(0.5, 0.1, 0.7, 0.12))
+
+	# Body
+	draw_polygon(PackedVector2Array([
+		Vector2(18, -28), Vector2(58, -28),
+		Vector2(56, -75), Vector2(14, -75),
+	]), PackedColorArray([robe_n]))
+	draw_polygon(PackedVector2Array([
+		Vector2(18, -75), Vector2(38, -75),
+		Vector2(38, -28), Vector2(14, -28),
+	]), PackedColorArray([robe_nd]))
+
+	# Izanami arms
+	draw_line(Vector2(18, -68), Vector2(8,  -54), skin_n, 8, true)
+	draw_circle(Vector2(8,  -54), 7, skin_n)
+	draw_line(Vector2(56, -68), Vector2(78, -56), skin_n, 8, true)
+	draw_circle(Vector2(78, -56), 7, skin_n)
+
+	# Izanami wisps / death hands
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 666
+	for i in 5:
+		var wx := 78.0 + rng.randf_range(-12, 12)
+		var wy := -56.0 + rng.randf_range(-30, -10)
+		draw_circle(Vector2(wx, wy), rng.randf_range(4, 9), Color(0.55, 0.15, 0.75, 0.45))
+
+	# Izanami head
+	draw_circle(Vector2(36, -95), 20, skin_n)
+	draw_arc(Vector2(36, -95), 20, PI * 0.7, PI * 2.3, 24, Color(0.10, 0.06, 0.12), 7, true)
+	# Hair tendrils
+	for i in 4:
+		var hx := 20.0 + float(i) * 10.0
+		draw_line(Vector2(hx, -113), Vector2(hx + rng.randf_range(-6, 6), -128),
+				  Color(0.10, 0.06, 0.12), 3, true)
+
+	draw_circle(Vector2(44, -97), 3, purple)
+	draw_circle(Vector2(28, -97), 3, purple)
+
+	# ── Connection — energy between them ──────────────────────────────────────
+	for i in 5:
+		var t  := float(i) / 4.0
+		var px := -8.0 + t * 16.0
+		var py := -52.0 + sin(t * PI) * -12.0
+		var col := Color(0.9, 0.9, 1.0, 1.0).lerp(Color(0.5, 0.1, 0.7, 1.0), t)
+		draw_circle(Vector2(px, py), 3.5 - absf(t - 0.5) * 2.0, col)
+
+	# Shared base shadow
+	_ellipse(Vector2(0, 8), 70, 12, Color(0, 0, 0, 0.35))
 
 # ── Helpers ────────────────────────────────────────────────────────────────────
 func _ellipse(center: Vector2, rx: float, ry: float, col: Color) -> void:
