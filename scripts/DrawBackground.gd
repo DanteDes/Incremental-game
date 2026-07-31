@@ -1,6 +1,14 @@
 extends Node2D
 
-var _time: float = 0.0
+var _time: float  = 0.0
+var _stage: int   = 0
+
+func _ready() -> void:
+	GameState.stage_changed.connect(_on_stage_changed)
+	_stage = GameState.stage
+
+func _on_stage_changed(s: int) -> void:
+	_stage = s
 
 func _process(delta: float) -> void:
 	_time += delta
@@ -8,10 +16,105 @@ func _process(delta: float) -> void:
 
 func _draw() -> void:
 	var vp = get_viewport_rect().size
+	match _stage:
+		5:  _draw_volcano_bg(vp)
+		7:  _draw_storm_bg(vp)
+		_:  _draw_night_dojo(vp)
+
+# ── Night dojo (stages 0–4, 6, 8–13) ─────────────────────────────────────────
+
+func _draw_night_dojo(vp: Vector2) -> void:
 	_draw_sky(vp)
 	_draw_stars(vp)
 	_draw_moon(vp)
 	_draw_mountains(vp)
+	_draw_ground(vp)
+	_draw_dojo_floor(vp)
+
+# ── Volcano (stage 5) ─────────────────────────────────────────────────────────
+
+func _draw_volcano_bg(vp: Vector2) -> void:
+	# Sky — dark red gradient
+	var steps := 14
+	var h := vp.y * 0.7 / steps
+	for i in steps:
+		var t := float(i) / steps
+		var col := Color(0.06, 0.01, 0.01).lerp(Color(0.35, 0.12, 0.02), t)
+		draw_rect(Rect2(0, i * h, vp.x, h + 1.0), col)
+
+	# Horizon ember glow — pulses
+	var glow_a := 0.3 + 0.1 * sin(_time * 0.8)
+	draw_rect(Rect2(0, vp.y * 0.55, vp.x, vp.y * 0.15), Color(1.0, 0.3, 0.0, glow_a))
+	draw_rect(Rect2(0, vp.y * 0.62, vp.x, vp.y * 0.06), Color(1.0, 0.55, 0.0, glow_a * 0.6))
+
+	# Distant volcano silhouette
+	draw_polygon(PackedVector2Array([
+		Vector2(vp.x * 0.3, vp.y * 0.68),
+		Vector2(vp.x * 0.42, vp.y * 0.22),
+		Vector2(vp.x * 0.54, vp.y * 0.68),
+	]), PackedColorArray([Color(0.06, 0.03, 0.02)]))
+	draw_polygon(PackedVector2Array([
+		Vector2(vp.x * 0.52, vp.y * 0.68),
+		Vector2(vp.x * 0.62, vp.y * 0.30),
+		Vector2(vp.x * 0.72, vp.y * 0.68),
+	]), PackedColorArray([Color(0.08, 0.04, 0.02)]))
+
+	# Lava glow at crater — flickers
+	var flicker := 0.6 + 0.4 * sin(_time * 4.3)
+	draw_circle(Vector2(vp.x * 0.42, vp.y * 0.22), 18 + flicker * 6, Color(1.0, 0.5, 0.0, 0.25 * flicker))
+	draw_circle(Vector2(vp.x * 0.42, vp.y * 0.22), 10, Color(1.0, 0.7, 0.1, 0.5 * flicker))
+
+	# Floating embers
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 555
+	for i in 18:
+		var bx := rng.randf_range(0.1, 0.9) * vp.x
+		var speed := rng.randf_range(0.3, 1.0)
+		var by := vp.y * 0.68 - fmod(_time * speed * 40.0 + rng.randf_range(0, vp.y * 0.68), vp.y * 0.68)
+		var ba := (1.0 - by / (vp.y * 0.68)) * rng.randf_range(0.4, 0.9)
+		draw_circle(Vector2(bx, by), rng.randf_range(1.5, 3.5), Color(1.0, rng.randf_range(0.3, 0.6), 0.0, ba))
+
+	_draw_ground(vp)
+	_draw_dojo_floor(vp)
+
+# ── Typhoon storm (stage 7) ───────────────────────────────────────────────────
+
+func _draw_storm_bg(vp: Vector2) -> void:
+	# Dark roiling sky
+	var steps := 14
+	var h := vp.y * 0.7 / steps
+	for i in steps:
+		var t := float(i) / steps
+		var col := Color(0.04, 0.05, 0.10).lerp(Color(0.14, 0.18, 0.28), t)
+		draw_rect(Rect2(0, i * h, vp.x, h + 1.0), col)
+
+	# Lightning flash — rare, very brief
+	var flash := maxf(0.0, sin(_time * 0.7) * sin(_time * 3.1) * sin(_time * 7.3))
+	if flash > 0.85:
+		draw_rect(Rect2(0, 0, vp.x, vp.y), Color(0.8, 0.85, 1.0, (flash - 0.85) * 4.0))
+
+	# Rain streaks
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 888
+	for i in 60:
+		var rx := rng.randf_range(0, vp.x)
+		var speed := rng.randf_range(300.0, 500.0)
+		var ry := fmod(_time * speed + rng.randf_range(0, vp.y), vp.y)
+		var ra := rng.randf_range(0.15, 0.45)
+		draw_line(
+			Vector2(rx, ry),
+			Vector2(rx - 6, ry + 18),
+			Color(0.65, 0.75, 1.0, ra), 1.0
+		)
+
+	# Dark mountain silhouettes
+	draw_polygon(PackedVector2Array([
+		Vector2(0, vp.y * 0.68), Vector2(0, vp.y * 0.5),
+		Vector2(vp.x * 0.25, vp.y * 0.28), Vector2(vp.x * 0.5, vp.y * 0.42),
+		Vector2(vp.x * 0.75, vp.y * 0.24), Vector2(vp.x, vp.y * 0.45),
+		Vector2(vp.x, vp.y * 0.68),
+	]), PackedColorArray([Color(0.06, 0.07, 0.12)]))
+
 	_draw_ground(vp)
 	_draw_dojo_floor(vp)
 
