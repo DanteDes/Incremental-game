@@ -13,25 +13,29 @@ const STAGE_NAMES = [
 ]
 const STAGE_HP = [
 	INF,     100.0,   500.0,   3000.0,
-	INF,     6000.0,  20000.0, INF,
+	INF,     INF,     INF,     INF,
 	50000.0, 150000.0, 600000.0, 2500000.0
 ]
 const STAGE_BONUS = [
-	0,      60,     250,    1000,
-	0,      3000,   10000,  0,
-	20000,  80000,  300000, 1000000
+	0,     60,    250,   1000,
+	0,     3000,  10000, 0,
+	20000, 80000, 300000, 1000000
 ]
 
-const AIR_PUNCHES_TO_ADVANCE       = 25
+const AIR_PUNCHES_TO_ADVANCE      = 25
 const WATERFALL_PUNCHES_TO_ADVANCE = 300
-const TYPHOON_PUNCHES_TO_ADVANCE   = 500
+const VOLCANO_PUNCHES_TO_ADVANCE   = 400
+const MOUNTAIN_PUNCHES_TO_ADVANCE  = 500
+const TYPHOON_PUNCHES_TO_ADVANCE   = 600
 
 var stage: int = Stage.AIR
 var target_hp: float = INF
 var target_max_hp: float = INF
 
-var air_punches: int      = 0
+var air_punches: int       = 0
 var waterfall_punches: int = 0
+var volcano_punches: int   = 0
+var mountain_punches: int  = 0
 var typhoon_punches: int   = 0
 var game_complete: bool    = false
 
@@ -95,6 +99,20 @@ func punch(combo_mult: float = 1.0) -> Dictionary:
 			if waterfall_punches >= WATERFALL_PUNCHES_TO_ADVANCE:
 				_unlock_element(0)
 				_apply_stage(Stage.VOLCANO)
+		Stage.VOLCANO:
+			volcano_punches += 1
+			if volcano_punches >= VOLCANO_PUNCHES_TO_ADVANCE:
+				_unlock_element(1)
+				gold += STAGE_BONUS[Stage.VOLCANO]
+				gold_changed.emit(gold)
+				_apply_stage(Stage.MOUNTAIN)
+		Stage.MOUNTAIN:
+			mountain_punches += 1
+			if mountain_punches >= MOUNTAIN_PUNCHES_TO_ADVANCE:
+				_unlock_element(2)
+				gold += STAGE_BONUS[Stage.MOUNTAIN]
+				gold_changed.emit(gold)
+				_apply_stage(Stage.TYPHOON)
 		Stage.TYPHOON:
 			typhoon_punches += 1
 			if typhoon_punches >= TYPHOON_PUNCHES_TO_ADVANCE:
@@ -134,11 +152,6 @@ func _destroy_target() -> void:
 		skill_tree_unlocked = true
 		skill_tree_unlocked_signal.emit()
 		stats_changed.emit()
-
-	if stage == Stage.VOLCANO:
-		_unlock_element(1)
-	elif stage == Stage.MOUNTAIN:
-		_unlock_element(2)
 
 	_apply_stage(stage + 1)
 

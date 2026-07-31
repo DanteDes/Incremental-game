@@ -409,6 +409,14 @@ func _update_hp_display() -> void:
 			_hp_bar.visible = false
 			_hp_title_lbl.text = "Entrenando en la Cascada"
 			_target_hp_lbl.text = "%d / %d golpes" % [GameState.waterfall_punches, GameState.WATERFALL_PUNCHES_TO_ADVANCE]
+		GameState.Stage.VOLCANO:
+			_hp_bar.visible = false
+			_hp_title_lbl.text = "Canalizando el Volcan"
+			_target_hp_lbl.text = "%d / %d golpes" % [GameState.volcano_punches, GameState.VOLCANO_PUNCHES_TO_ADVANCE]
+		GameState.Stage.MOUNTAIN:
+			_hp_bar.visible = false
+			_hp_title_lbl.text = "Escalando la Montana"
+			_target_hp_lbl.text = "%d / %d golpes" % [GameState.mountain_punches, GameState.MOUNTAIN_PUNCHES_TO_ADVANCE]
 		GameState.Stage.TYPHOON:
 			_hp_bar.visible = false
 			_hp_title_lbl.text = "Resistiendo el Tifon"
