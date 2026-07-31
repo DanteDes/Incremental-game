@@ -20,3 +20,6 @@ docs/superpowers/
 
 # Local git worktrees
 .worktrees/
+
+# Claude Code planning docs
+.claude/
