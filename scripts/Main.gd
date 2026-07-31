@@ -40,7 +40,7 @@ func _build_scene() -> void:
 	var vp := get_viewport_rect().size
 
 	# Background (mountains, sky, dojo floor)
-	var bg := load("res://scripts/DrawBackground.gd").new()
+	var bg: Node2D = load("res://scripts/DrawBackground.gd").new()
 	add_child(bg)
 
 	# Player character
@@ -254,7 +254,7 @@ func _input(event: InputEvent) -> void:
 
 func _execute_punch() -> void:
 	var gs = get_node("/root/GameState")
-	var result := gs.punch()
+	var result: Dictionary = gs.punch()
 	_spawn_damage(result.damage, result.is_crit)
 	_animate_punch()
 	_update_hp_display()
