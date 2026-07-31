@@ -118,6 +118,13 @@ max_value = 1.0
 value = 1.0
 show_percentage = false
 
+[node name="ComboLabel" type="Label" parent="UILayer/UIRoot/MainLayout/CenterColumn/TopBarMargin/TopBarVBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 26
+horizontal_alignment = 1
+visible = false
+
 [node name="InfoPanel" type="PanelContainer" parent="UILayer/UIRoot/MainLayout"]
 layout_mode = 2
 custom_minimum_size = Vector2(225, 0)
@@ -183,6 +190,42 @@ theme_override_font_sizes/font_size = 12
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_font_sizes/font_size = 12
+
+[node name="HSeparator6" type="HSeparator" parent="UILayer/UIRoot/MainLayout/InfoPanel/InfoMargin/InfoVBox"]
+layout_mode = 2
+
+[node name="ElemsTitle" type="Label" parent="UILayer/UIRoot/MainLayout/InfoPanel/InfoMargin/InfoVBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "ELEMENTOS"
+
+[node name="AguaLabel" type="Label" parent="UILayer/UIRoot/MainLayout/InfoPanel/InfoMargin/InfoVBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 11
+modulate = Color(0.38, 0.38, 0.38, 1)
+text = "~ Agua  (+15% crit)"
+
+[node name="FuegoLabel" type="Label" parent="UILayer/UIRoot/MainLayout/InfoPanel/InfoMargin/InfoVBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 11
+modulate = Color(0.38, 0.38, 0.38, 1)
+text = "~ Fuego  (+30% daño)"
+
+[node name="TierraLabel" type="Label" parent="UILayer/UIRoot/MainLayout/InfoPanel/InfoMargin/InfoVBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 11
+modulate = Color(0.38, 0.38, 0.38, 1)
+text = "~ Tierra  (+25% oro)"
+
+[node name="HuracanLabel" type="Label" parent="UILayer/UIRoot/MainLayout/InfoPanel/InfoMargin/InfoVBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 11
+modulate = Color(0.38, 0.38, 0.38, 1)
+text = "~ Huracan  (+0.5 vel)"
 
 [node name="DamageLayer" type="Control" parent="UILayer/UIRoot"]
 unique_name_in_owner = true

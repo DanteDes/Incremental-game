@@ -1,10 +1,21 @@
 extends Node2D
 
-var _punch_timer: float = 0.0
+const COMBO_WINDOW: float = 1.2
+
+const ELEM_DATA := [
+	["~ Agua",    Color(0.30, 0.65, 1.0), "+15% crit"],
+	["~ Fuego",   Color(1.00, 0.42, 0.1), "+30% daño"],
+	["~ Tierra",  Color(0.45, 0.78, 0.2), "+25% oro"],
+	["~ Huracan", Color(0.72, 0.90, 1.0), "+0.5 vel"],
+]
+
+var _punch_timer: float  = 0.0
+var _combo: int          = 0
+var _combo_decay: float  = 0.0
 
 # Visual nodes
-var _player_node: Node2D   # DrawPlayer
-var _target_node: Node2D   # DrawTarget
+var _player_node: Node2D
+var _target_node: Node2D
 var _player_home: Vector2
 var _target_home: Vector2
 var _tween_player: Tween
@@ -18,6 +29,7 @@ var _mat_target: ShaderMaterial
 @onready var _damage_container: Control = %DamageLayer
 @onready var _hp_bar: ProgressBar = %HPBar
 @onready var _hp_title_lbl: Label = %HPTitleLabel
+@onready var _combo_lbl: Label = %ComboLabel
 
 @onready var _gold_lbl: Label = %GoldLabel
 @onready var _target_name_lbl: Label = %TargetNameLabel
@@ -33,7 +45,11 @@ var _mat_target: ShaderMaterial
 @onready var _ki_row: UpgradeRow = %KiRow
 @onready var _skill_section: Control = %SkillSection
 
+var _element_lbls: Array[Label]
+
 func _ready() -> void:
+	_element_lbls = [%AguaLabel, %FuegoLabel, %TierraLabel, %HuracanLabel]
+
 	_build_scene()
 
 	_str_row.configure("FUERZA", "Aumenta el daño por golpe")
@@ -51,6 +67,7 @@ func _ready() -> void:
 	GameState.gold_changed.connect(_on_gold_changed)
 	GameState.stats_changed.connect(_on_stats_changed)
 	GameState.skill_tree_unlocked_signal.connect(_on_skill_tree_unlocked)
+	GameState.element_gained.connect(_on_element_gained)
 	_update_all()
 
 # ── Scene Construction ─────────────────────────────────────────────────────────
@@ -61,11 +78,9 @@ func _ready() -> void:
 func _build_scene() -> void:
 	var vp := get_viewport_rect().size
 
-	# Background (mountains, sky, dojo floor)
 	var bg: Node2D = load("res://scripts/DrawBackground.gd").new()
 	add_child(bg)
 
-	# Player character + ki aura shader
 	_player_node = load("res://scripts/DrawPlayer.gd").new()
 	_player_home = Vector2(vp.x * 0.3, vp.y * 0.68)
 	_player_node.position = _player_home
@@ -74,7 +89,6 @@ func _build_scene() -> void:
 	_player_node.material = _mat_player
 	add_child(_player_node)
 
-	# Target + hit flash shader
 	_target_node = load("res://scripts/DrawTarget.gd").new()
 	_target_home = Vector2(vp.x * 0.68, vp.y * 0.68)
 	_target_node.position = _target_home
@@ -83,7 +97,6 @@ func _build_scene() -> void:
 	_target_node.material = _mat_target
 	add_child(_target_node)
 
-	# Vignette overlay (above game world, below UI)
 	var vignette_layer := CanvasLayer.new()
 	vignette_layer.layer = 1
 	add_child(vignette_layer)
@@ -98,26 +111,50 @@ func _build_scene() -> void:
 # ── Game Loop ──────────────────────────────────────────────────────────────────
 
 func _process(delta: float) -> void:
-	if GameState.sensei_defeated: return
+	if GameState.game_complete: return
+
+	if _combo > 0:
+		_combo_decay -= delta
+		if _combo_decay <= 0.0:
+			_combo = 0
+			_update_combo_display()
 
 	_punch_timer += delta
-	if _punch_timer >= 1.0 / GameState.speed:
-		_punch_timer -= 1.0 / GameState.speed
-		_execute_punch()
+	if _punch_timer >= 1.0 / GameState.effective_speed():
+		_punch_timer -= 1.0 / GameState.effective_speed()
+		_execute_punch(false)
 
 func _input(event: InputEvent) -> void:
 	if not (event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT):
 		return
 	var vp := get_viewport_rect().size
 	if event.position.x > 265 and event.position.x < vp.x - 225:
-		_execute_punch()
+		_execute_punch(true)
 
-func _execute_punch() -> void:
-	var result: Dictionary = GameState.punch()
+func _execute_punch(is_manual: bool) -> void:
+	if is_manual:
+		_combo += 1
+		_combo_decay = COMBO_WINDOW
+		_update_combo_display()
+	var result: Dictionary = GameState.punch(_combo_multiplier())
 	_spawn_damage(result.damage, result.is_crit)
 	_animate_punch()
 	_update_hp_display()
 	_update_button_states()
+
+func _combo_multiplier() -> float:
+	if _combo <= 1: return 1.0
+	return 1.0 + minf(float(_combo - 1), 20.0) * 0.1
+
+func _update_combo_display() -> void:
+	if _combo <= 1:
+		_combo_lbl.visible = false
+		return
+	_combo_lbl.visible = true
+	var mult := _combo_multiplier()
+	_combo_lbl.text = "COMBO  x%.1f" % mult
+	var t := minf(float(_combo - 1) / 19.0, 1.0)
+	_combo_lbl.modulate = Color(1.0, 1.0 - t * 0.6, 0.2)
 
 func _spawn_damage(dmg: float, is_crit: bool) -> void:
 	var vp := get_viewport_rect().size
@@ -137,12 +174,9 @@ func _spawn_damage(dmg: float, is_crit: bool) -> void:
 	tw.tween_callback(lbl.queue_free)
 
 func _animate_punch() -> void:
-	if _tween_player:
-		_tween_player.kill()
-	if _tween_target:
-		_tween_target.kill()
+	if _tween_player: _tween_player.kill()
+	if _tween_target: _tween_target.kill()
 
-	# Ki aura flash on player
 	_mat_player.set_shader_parameter("aura", 1.0)
 	var tw_aura := create_tween()
 	tw_aura.tween_method(
@@ -150,7 +184,6 @@ func _animate_punch() -> void:
 		1.0, 0.0, 0.3
 	)
 
-	# Hit flash on target
 	_mat_target.set_shader_parameter("flash", 1.0)
 	var tw_flash := create_tween()
 	tw_flash.tween_method(
@@ -171,11 +204,11 @@ func _animate_punch() -> void:
 # ── UI Updates ─────────────────────────────────────────────────────────────────
 
 func _update_hp_display() -> void:
-	if GameState.sensei_defeated:
-		_hp_title_lbl.text = "¡GANASTE! ¡Superaste al Sensei!"
+	if GameState.game_complete:
+		_hp_title_lbl.text = "¡LEYENDA! Venciste a Izanagi e Izanami"
 		_hp_bar.visible = false
-		_target_name_lbl.text = "El Sensei te honra."
-		_target_hp_lbl.text = "Eres el maestro ahora."
+		_target_name_lbl.text = "El cosmos te reconoce."
+		_target_hp_lbl.text = "No hay más adversarios."
 		return
 
 	_target_name_lbl.text = "Objetivo: " + GameState.target_name()
@@ -189,18 +222,33 @@ func _update_hp_display() -> void:
 			_hp_bar.visible = false
 			_hp_title_lbl.text = "Entrenando en la Cascada"
 			_target_hp_lbl.text = "%d / %d golpes" % [GameState.waterfall_punches, GameState.WATERFALL_PUNCHES_TO_ADVANCE]
+		GameState.Stage.VOLCANO:
+			_hp_bar.visible = false
+			_hp_title_lbl.text = "Canalizando el Volcan"
+			_target_hp_lbl.text = "%d / %d golpes" % [GameState.volcano_punches, GameState.VOLCANO_PUNCHES_TO_ADVANCE]
+		GameState.Stage.MOUNTAIN:
+			_hp_bar.visible = false
+			_hp_title_lbl.text = "Escalando la Montana"
+			_target_hp_lbl.text = "%d / %d golpes" % [GameState.mountain_punches, GameState.MOUNTAIN_PUNCHES_TO_ADVANCE]
+		GameState.Stage.TYPHOON:
+			_hp_bar.visible = false
+			_hp_title_lbl.text = "Resistiendo el Tifon"
+			_target_hp_lbl.text = "%d / %d golpes" % [GameState.typhoon_punches, GameState.TYPHOON_PUNCHES_TO_ADVANCE]
 		_:
 			_hp_bar.visible = true
 			_hp_bar.value = GameState.hp_ratio()
-			_hp_title_lbl.text = "Rompiendo " + GameState.target_name()
+			_hp_title_lbl.text = "Enfrentando " + GameState.target_name()
 			_target_hp_lbl.text = "HP: %s / %s" % [_fmt(GameState.target_hp), _fmt(GameState.target_max_hp)]
 
 func _update_all() -> void:
 	_str_val_lbl.text = "Fuerza:    %.1f dmg" % GameState.strength
-	_spd_val_lbl.text = "Velocidad: %.2f /s"  % GameState.speed
-	_tec_val_lbl.text = "Técnica:   %d%% crit" % int(GameState.technique * 100)
+	_spd_val_lbl.text = "Velocidad: %.2f /s"  % GameState.effective_speed()
+	_tec_val_lbl.text = "Tecnica:   %d%% crit" % int(GameState.effective_technique() * 100)
 	_gold_lbl.text = "Oro: " + _fmt(GameState.gold)
 	_skill_section.visible = GameState.skill_tree_unlocked
+	for i in 4:
+		if GameState.elements[i]:
+			_element_lbls[i].modulate = ELEM_DATA[i][1]
 	_update_hp_display()
 	_update_button_states()
 
@@ -214,7 +262,7 @@ func _update_button_states() -> void:
 # ── Signal Handlers ────────────────────────────────────────────────────────────
 
 func _on_stage_changed(_s: int) -> void:
-	_update_all()  # DrawTarget handles its own redraw via its own signal connection
+	_update_all()
 
 func _on_gold_changed(_g: int) -> void:
 	_gold_lbl.text = "Oro: " + _fmt(GameState.gold)
@@ -225,6 +273,10 @@ func _on_stats_changed() -> void:
 
 func _on_skill_tree_unlocked() -> void:
 	_skill_section.visible = true
+
+func _on_element_gained(index: int) -> void:
+	var tw := create_tween()
+	tw.tween_property(_element_lbls[index], "modulate", ELEM_DATA[index][1], 0.6)
 
 # ── Helpers ────────────────────────────────────────────────────────────────────
 
