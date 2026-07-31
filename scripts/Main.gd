@@ -24,6 +24,26 @@ var _tween_target: Tween
 # Shader materials
 var _mat_player: ShaderMaterial
 var _mat_target: ShaderMaterial
+var _mat_vignette: ShaderMaterial
+var _mat_clouds:   ShaderMaterial
+var _tint_current: Color = Color(0.03, 0.05, 0.12)
+
+const STAGE_TINTS: Array[Color] = [
+	Color(0.03, 0.05, 0.12),  # 0  Air        — night blue (default)
+	Color(0.07, 0.05, 0.02),  # 1  Hay         — warm straw
+	Color(0.02, 0.06, 0.02),  # 2  Tree        — forest dark
+	Color(0.05, 0.05, 0.07),  # 3  Stone       — cold grey
+	Color(0.01, 0.04, 0.10),  # 4  Waterfall   — deep teal
+	Color(0.12, 0.03, 0.01),  # 5  Volcano     — ember red
+	Color(0.04, 0.04, 0.08),  # 6  Mountain    — slate purple
+	Color(0.02, 0.03, 0.10),  # 7  Typhoon     — storm blue
+	Color(0.07, 0.04, 0.01),  # 8  Sensei      — amber lamp
+	Color(0.01, 0.07, 0.03),  # 9  Spirit Wolf — spectral green
+	Color(0.10, 0.02, 0.01),  # 10 Dragon      — deep scarlet
+	Color(0.09, 0.07, 0.01),  # 11 Amaterasu   — solar gold
+	Color(0.02, 0.03, 0.10),  # 12 Susanoo     — storm navy
+	Color(0.06, 0.02, 0.08),  # 13 Izanagi/Izanami — void purple
+]
 
 # UI — authored in scenes/Main.tscn, fetched by unique name
 @onready var _damage_container: Control = %DamageLayer
@@ -100,12 +120,22 @@ func _build_scene() -> void:
 	var vignette_layer := CanvasLayer.new()
 	vignette_layer.layer = 1
 	add_child(vignette_layer)
+
+	# Cloud layer — renders below vignette, above the drawn background
+	var cloud_rect := ColorRect.new()
+	cloud_rect.set_anchors_preset(Control.PRESET_FULL_RECT)
+	cloud_rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_mat_clouds = ShaderMaterial.new()
+	_mat_clouds.shader = load("res://shaders/bg_clouds.gdshader")
+	cloud_rect.material = _mat_clouds
+	vignette_layer.add_child(cloud_rect)
+
 	var vignette_rect := ColorRect.new()
 	vignette_rect.set_anchors_preset(Control.PRESET_FULL_RECT)
 	vignette_rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	var vignette_mat := ShaderMaterial.new()
-	vignette_mat.shader = load("res://shaders/vignette.gdshader")
-	vignette_rect.material = vignette_mat
+	_mat_vignette = ShaderMaterial.new()
+	_mat_vignette.shader = load("res://shaders/vignette.gdshader")
+	vignette_rect.material = _mat_vignette
 	vignette_layer.add_child(vignette_rect)
 
 # ── Game Loop ──────────────────────────────────────────────────────────────────
@@ -261,8 +291,21 @@ func _update_button_states() -> void:
 
 # ── Signal Handlers ────────────────────────────────────────────────────────────
 
-func _on_stage_changed(_s: int) -> void:
+func _on_stage_changed(s: int) -> void:
 	_update_all()
+	_transition_stage_tint(s)
+
+func _transition_stage_tint(s: int) -> void:
+	if s < 0 or s >= STAGE_TINTS.size(): return
+	var target := STAGE_TINTS[s]
+	var from := _tint_current
+	var tw := create_tween()
+	tw.tween_method(
+		func(c: Color):
+			_tint_current = c
+			_mat_vignette.set_shader_parameter("tint_color", Vector3(c.r, c.g, c.b)),
+		from, target, 1.5
+	)
 
 func _on_gold_changed(_g: int) -> void:
 	_gold_lbl.text = "Oro: " + _fmt(GameState.gold)
