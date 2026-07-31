@@ -1,10 +1,19 @@
-[gd_resource type="Theme" load_steps=2 format=3]
+[gd_resource type="Theme" load_steps=3 format=3]
 
 [ext_resource type="FontFile" path="res://resources/fonts/BoldPixels.ttf" id="1_boldpixels"]
+[ext_resource type="Texture2D" path="res://resources/ui/panel_border.png" id="2_panelborder"]
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_panel"]
+texture = ExtResource("2_panelborder")
+texture_margin_left = 8.0
+texture_margin_top = 8.0
+texture_margin_right = 8.0
+texture_margin_bottom = 8.0
 
 [resource]
 default_font = ExtResource("1_boldpixels")
 default_font_size = 13
+PanelContainer/styles/panel = SubResource("StyleBoxTexture_panel")
 SectionTitle/base_type = &"Label"
 SectionTitle/font_sizes/font_size = 20
 GoldLabel/base_type = &"Label"
