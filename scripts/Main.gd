@@ -332,7 +332,7 @@ func _execute_punch(is_manual: bool) -> void:
 
 func _combo_multiplier() -> float:
 	if _combo <= 1: return 1.0
-	return 1.0 + minf(float(_combo - 1), 19.0) * 0.1
+	return 1.0 + minf(float(_combo - 1), 20.0) * 0.1
 
 func _update_combo_display() -> void:
 	if _combo <= 1:
