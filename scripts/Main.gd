@@ -310,19 +310,20 @@ func _process(delta: float) -> void:
 	_punch_timer += delta
 	if _punch_timer >= 1.0 / GameState.effective_speed():
 		_punch_timer -= 1.0 / GameState.effective_speed()
-		_execute_punch()
+		_execute_punch(false)
 
 func _input(event: InputEvent) -> void:
 	if not (event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT):
 		return
 	var vp := get_viewport_rect().size
 	if event.position.x > 265 and event.position.x < vp.x - 225:
-		_execute_punch()
+		_execute_punch(true)
 
-func _execute_punch() -> void:
-	_combo += 1
-	_combo_decay = COMBO_WINDOW
-	_update_combo_display()
+func _execute_punch(is_manual: bool) -> void:
+	if is_manual:
+		_combo += 1
+		_combo_decay = COMBO_WINDOW
+		_update_combo_display()
 	var result: Dictionary = GameState.punch(_combo_multiplier())
 	_spawn_damage(result.damage, result.is_crit)
 	_animate_punch()
