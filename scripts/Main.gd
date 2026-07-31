@@ -2,6 +2,13 @@ extends Node2D
 
 const COMBO_WINDOW: float = 1.2
 
+const ELEM_DATA := [
+	["~ Agua",    Color(0.30, 0.65, 1.0), "+15% crit"],
+	["~ Fuego",   Color(1.00, 0.42, 0.1), "+30% daño"],
+	["~ Tierra",  Color(0.45, 0.78, 0.2), "+25% oro"],
+	["~ Huracan", Color(0.72, 0.90, 1.0), "+0.5 vel"],
+]
+
 var _punch_timer: float  = 0.0
 var _combo: int          = 0
 var _combo_decay: float  = 0.0
@@ -251,12 +258,6 @@ func _build_info_panel(parent: Control, vp: Vector2) -> void:
 	elem_title.add_theme_font_size_override("font_size", 14)
 	vbox.add_child(elem_title)
 
-	const ELEM_DATA := [
-		["~ Agua",    Color(0.30, 0.65, 1.0), "+15% crit"],
-		["~ Fuego",   Color(1.00, 0.42, 0.1), "+30% daño"],
-		["~ Tierra",  Color(0.45, 0.78, 0.2), "+25% oro"],
-		["~ Huracan", Color(0.72, 0.90, 1.0), "+0.5 vel"],
-	]
 	_element_lbls = []
 	for d in ELEM_DATA:
 		var lbl := Label.new()
@@ -436,7 +437,7 @@ func _update_all() -> void:
 	_skill_section.visible = GameState.skill_tree_unlocked
 	for i in 4:
 		if GameState.elements[i]:
-			_element_lbls[i].modulate = Color(1.0, 1.0, 1.0)
+			_element_lbls[i].modulate = ELEM_DATA[i][1]
 	_update_hp_display()
 	_update_button_states()
 
@@ -472,9 +473,8 @@ func _on_skill_tree_unlocked() -> void:
 	_skill_section.visible = true
 
 func _on_element_gained(index: int) -> void:
-	var colors := [Color(0.30, 0.65, 1.0), Color(1.00, 0.42, 0.1), Color(0.45, 0.78, 0.2), Color(0.72, 0.90, 1.0)]
 	var tw := create_tween()
-	tw.tween_property(_element_lbls[index], "modulate", colors[index], 0.6)
+	tw.tween_property(_element_lbls[index], "modulate", ELEM_DATA[index][1], 0.6)
 
 # ── Helpers ────────────────────────────────────────────────────────────────────
 
