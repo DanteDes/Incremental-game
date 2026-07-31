@@ -13,7 +13,7 @@ dest_files=["res://.godot/imported/BoldPixels.ttf-94aa977b9ca442bd74713d5a83ffda
 [params]
 
 Rendering=null
-antialiasing=1
+antialiasing=0
 generate_mipmaps=false
 disable_embedded_bitmaps=true
 multichannel_signed_distance_field=false

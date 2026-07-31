@@ -1,4 +1,5 @@
 extends VBoxContainer
+class_name UpgradeRow
 
 signal pressed
 

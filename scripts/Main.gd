@@ -26,11 +26,11 @@ var _mat_target: ShaderMaterial
 @onready var _spd_val_lbl: Label = %SpdValLabel
 @onready var _tec_val_lbl: Label = %TecValLabel
 
-@onready var _str_row: VBoxContainer = %StrRow
-@onready var _spd_row: VBoxContainer = %SpdRow
-@onready var _tec_row: VBoxContainer = %TecRow
-@onready var _ele_row: VBoxContainer = %EleRow
-@onready var _ki_row: VBoxContainer = %KiRow
+@onready var _str_row: UpgradeRow = %StrRow
+@onready var _spd_row: UpgradeRow = %SpdRow
+@onready var _tec_row: UpgradeRow = %TecRow
+@onready var _ele_row: UpgradeRow = %EleRow
+@onready var _ki_row: UpgradeRow = %KiRow
 @onready var _skill_section: Control = %SkillSection
 
 func _ready() -> void:
