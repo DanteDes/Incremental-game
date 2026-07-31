@@ -43,11 +43,11 @@ func _apply_stage(s: int) -> void:
 	stage = s
 	target_max_hp = STAGE_HP[s]
 	target_hp = target_max_hp
-	emit_signal("stage_changed", s)
+	stage_changed.emit(s)
 
 # Returns { damage: float, is_crit: bool }
 func punch() -> Dictionary:
-	var dmg = strength * (2.5 if randf() < technique else 1.0)
+	var dmg: float = strength * (2.5 if randf() < technique else 1.0)
 
 	if elemental_level > 0:
 		dmg += elemental_level * strength * 0.35
@@ -68,28 +68,28 @@ func punch() -> Dictionary:
 				target_hp = maxf(0.0, target_hp - dmg)
 				if target_hp == 0.0:
 					sensei_defeated = true
-					emit_signal("stage_changed", Stage.SENSEI)
+					stage_changed.emit(Stage.SENSEI)
 		_:
 			target_hp = maxf(0.0, target_hp - dmg)
 			if target_hp == 0.0:
 				_destroy_target()
 
-	var earned = 1 if stage == Stage.AIR else maxi(1, int(dmg * 0.25))
+	var earned: int = 1 if stage == Stage.AIR else maxi(1, int(dmg * 0.25))
 	gold += earned
-	emit_signal("gold_changed", gold)
+	gold_changed.emit(gold)
 
 	return {"damage": dmg, "is_crit": dmg > strength * 1.5}
 
 func _destroy_target() -> void:
 	gold += STAGE_BONUS[stage]
-	emit_signal("gold_changed", gold)
+	gold_changed.emit(gold)
 
 	if stage == Stage.STONE and not skill_tree_unlocked:
 		skill_tree_unlocked = true
-		emit_signal("skill_tree_unlocked_signal")
-		emit_signal("stats_changed")
+		skill_tree_unlocked_signal.emit()
+		stats_changed.emit()
 
-	var next = mini(stage + 1, Stage.SENSEI)
+	var next: int = mini(stage + 1, Stage.SENSEI)
 	_apply_stage(next)
 
 # ── Costs ─────────────────────────────────────────────────────────────────────
@@ -110,38 +110,38 @@ func upgrade_strength() -> void:
 	gold -= strength_cost()
 	strength_level += 1
 	strength = 1.0 + strength_level * 1.5
-	emit_signal("stats_changed")
-	emit_signal("gold_changed", gold)
+	stats_changed.emit()
+	gold_changed.emit(gold)
 
 func upgrade_speed() -> void:
 	if not can_upgrade_speed(): return
 	gold -= speed_cost()
 	speed_level += 1
 	speed = 1.0 + speed_level * 0.5
-	emit_signal("stats_changed")
-	emit_signal("gold_changed", gold)
+	stats_changed.emit()
+	gold_changed.emit(gold)
 
 func upgrade_technique() -> void:
 	if not can_upgrade_technique(): return
 	gold -= technique_cost()
 	technique_level += 1
 	technique = minf(0.05 + technique_level * 0.05, 0.90)
-	emit_signal("stats_changed")
-	emit_signal("gold_changed", gold)
+	stats_changed.emit()
+	gold_changed.emit(gold)
 
 func upgrade_elemental() -> void:
 	if not can_upgrade_elemental(): return
 	gold -= elemental_cost()
 	elemental_level += 1
-	emit_signal("stats_changed")
-	emit_signal("gold_changed", gold)
+	stats_changed.emit()
+	gold_changed.emit(gold)
 
 func upgrade_ki() -> void:
 	if not can_upgrade_ki(): return
 	gold -= ki_cost()
 	ki_level += 1
-	emit_signal("stats_changed")
-	emit_signal("gold_changed", gold)
+	stats_changed.emit()
+	gold_changed.emit(gold)
 
 func hp_ratio() -> float:
 	if target_max_hp == INF: return 1.0

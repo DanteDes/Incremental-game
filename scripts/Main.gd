@@ -27,11 +27,10 @@ var _skill_section: Control
 
 func _ready() -> void:
 	_build_scene()
-	var gs = get_node("/root/GameState")
-	gs.stage_changed.connect(_on_stage_changed)
-	gs.gold_changed.connect(_on_gold_changed)
-	gs.stats_changed.connect(_on_stats_changed)
-	gs.skill_tree_unlocked_signal.connect(_on_skill_tree_unlocked)
+	GameState.stage_changed.connect(_on_stage_changed)
+	GameState.gold_changed.connect(_on_gold_changed)
+	GameState.stats_changed.connect(_on_stats_changed)
+	GameState.skill_tree_unlocked_signal.connect(_on_skill_tree_unlocked)
 	_update_all()
 
 # ── Scene Construction ─────────────────────────────────────────────────────────
@@ -96,13 +95,13 @@ func _build_upgrade_panel(parent: Control, vp: Vector2) -> void:
 	vbox.add_child(HSeparator.new())
 
 	_btn_str = _upgrade_row(vbox, "FUERZA",    "Aumenta el daño por golpe")
-	_btn_str.pressed.connect(func(): get_node("/root/GameState").upgrade_strength())
+	_btn_str.pressed.connect(GameState.upgrade_strength)
 
 	_btn_spd = _upgrade_row(vbox, "VELOCIDAD", "Golpes automáticos por segundo")
-	_btn_spd.pressed.connect(func(): get_node("/root/GameState").upgrade_speed())
+	_btn_spd.pressed.connect(GameState.upgrade_speed)
 
 	_btn_tec = _upgrade_row(vbox, "TÉCNICA",   "Probabilidad de golpe crítico (x2.5)")
-	_btn_tec.pressed.connect(func(): get_node("/root/GameState").upgrade_technique())
+	_btn_tec.pressed.connect(GameState.upgrade_technique)
 
 	vbox.add_child(HSeparator.new())
 
@@ -126,10 +125,10 @@ func _build_upgrade_panel(parent: Control, vp: Vector2) -> void:
 	_skill_section.add_child(sk_hint)
 
 	_btn_ele = _upgrade_row(_skill_section, "ELEMENTAL", "Añade daño elemental fijo")
-	_btn_ele.pressed.connect(func(): get_node("/root/GameState").upgrade_elemental())
+	_btn_ele.pressed.connect(GameState.upgrade_elemental)
 
 	_btn_ki = _upgrade_row(_skill_section, "KI", "Multiplica todo el daño")
-	_btn_ki.pressed.connect(func(): get_node("/root/GameState").upgrade_ki())
+	_btn_ki.pressed.connect(GameState.upgrade_ki)
 
 func _upgrade_row(parent: Control, stat: String, desc: String) -> Button:
 	var container := VBoxContainer.new()
@@ -237,12 +236,11 @@ func _build_top_bar(parent: Control, vp: Vector2) -> void:
 # ── Game Loop ──────────────────────────────────────────────────────────────────
 
 func _process(delta: float) -> void:
-	var gs = get_node("/root/GameState")
-	if gs.sensei_defeated: return
+	if GameState.sensei_defeated: return
 
 	_punch_timer += delta
-	if _punch_timer >= 1.0 / gs.speed:
-		_punch_timer -= 1.0 / gs.speed
+	if _punch_timer >= 1.0 / GameState.speed:
+		_punch_timer -= 1.0 / GameState.speed
 		_execute_punch()
 
 func _input(event: InputEvent) -> void:
@@ -253,8 +251,7 @@ func _input(event: InputEvent) -> void:
 		_execute_punch()
 
 func _execute_punch() -> void:
-	var gs = get_node("/root/GameState")
-	var result: Dictionary = gs.punch()
+	var result: Dictionary = GameState.punch()
 	_spawn_damage(result.damage, result.is_crit)
 	_animate_punch()
 	_update_hp_display()
@@ -295,58 +292,54 @@ func _animate_punch() -> void:
 # ── UI Updates ─────────────────────────────────────────────────────────────────
 
 func _update_hp_display() -> void:
-	var gs = get_node("/root/GameState")
-
-	if gs.sensei_defeated:
+	if GameState.sensei_defeated:
 		_hp_title_lbl.text = "¡GANASTE! ¡Superaste al Sensei!"
 		_hp_bar.visible = false
 		_target_name_lbl.text = "El Sensei te honra."
 		_target_hp_lbl.text = "Eres el maestro ahora."
 		return
 
-	_target_name_lbl.text = "Objetivo: " + gs.target_name()
+	_target_name_lbl.text = "Objetivo: " + GameState.target_name()
 
-	match gs.stage:
-		0:  # AIR
+	match GameState.stage:
+		GameState.Stage.AIR:
 			_hp_bar.visible = false
 			_hp_title_lbl.text = "Calentando motores..."
-			_target_hp_lbl.text = "%d / %d golpes al aire" % [gs.air_punches, gs.AIR_PUNCHES_TO_ADVANCE]
-		4:  # WATERFALL
+			_target_hp_lbl.text = "%d / %d golpes al aire" % [GameState.air_punches, GameState.AIR_PUNCHES_TO_ADVANCE]
+		GameState.Stage.WATERFALL:
 			_hp_bar.visible = false
 			_hp_title_lbl.text = "Entrenando en la Cascada"
-			_target_hp_lbl.text = "%d / %d golpes" % [gs.waterfall_punches, gs.WATERFALL_PUNCHES_TO_ADVANCE]
+			_target_hp_lbl.text = "%d / %d golpes" % [GameState.waterfall_punches, GameState.WATERFALL_PUNCHES_TO_ADVANCE]
 		_:
 			_hp_bar.visible = true
-			_hp_bar.value = gs.hp_ratio()
-			_hp_title_lbl.text = "Rompiendo " + gs.target_name()
-			_target_hp_lbl.text = "HP: %s / %s" % [_fmt(gs.target_hp), _fmt(gs.target_max_hp)]
+			_hp_bar.value = GameState.hp_ratio()
+			_hp_title_lbl.text = "Rompiendo " + GameState.target_name()
+			_target_hp_lbl.text = "HP: %s / %s" % [_fmt(GameState.target_hp), _fmt(GameState.target_max_hp)]
 
 func _update_all() -> void:
-	var gs = get_node("/root/GameState")
-	_str_val_lbl.text = "Fuerza:    %.1f dmg" % gs.strength
-	_spd_val_lbl.text = "Velocidad: %.2f /s"  % gs.speed
-	_tec_val_lbl.text = "Técnica:   %d%% crit" % int(gs.technique * 100)
-	_gold_lbl.text = "Oro: " + _fmt(gs.gold)
-	_skill_section.visible = gs.skill_tree_unlocked
+	_str_val_lbl.text = "Fuerza:    %.1f dmg" % GameState.strength
+	_spd_val_lbl.text = "Velocidad: %.2f /s"  % GameState.speed
+	_tec_val_lbl.text = "Técnica:   %d%% crit" % int(GameState.technique * 100)
+	_gold_lbl.text = "Oro: " + _fmt(GameState.gold)
+	_skill_section.visible = GameState.skill_tree_unlocked
 	_update_hp_display()
 	_update_button_states()
 
 func _update_button_states() -> void:
-	var gs = get_node("/root/GameState")
-	_btn_str.text     = "Nv.%d — $%s" % [gs.strength_level + 1, _fmt(gs.strength_cost())]
-	_btn_str.disabled = not gs.can_upgrade_strength()
+	_btn_str.text     = "Nv.%d — $%s" % [GameState.strength_level + 1, _fmt(GameState.strength_cost())]
+	_btn_str.disabled = not GameState.can_upgrade_strength()
 
-	_btn_spd.text     = "Nv.%d — $%s" % [gs.speed_level + 1, _fmt(gs.speed_cost())]
-	_btn_spd.disabled = not gs.can_upgrade_speed()
+	_btn_spd.text     = "Nv.%d — $%s" % [GameState.speed_level + 1, _fmt(GameState.speed_cost())]
+	_btn_spd.disabled = not GameState.can_upgrade_speed()
 
-	_btn_tec.text     = "Nv.%d — $%s" % [gs.technique_level + 1, _fmt(gs.technique_cost())]
-	_btn_tec.disabled = not gs.can_upgrade_technique()
+	_btn_tec.text     = "Nv.%d — $%s" % [GameState.technique_level + 1, _fmt(GameState.technique_cost())]
+	_btn_tec.disabled = not GameState.can_upgrade_technique()
 
-	_btn_ele.text     = "Nv.%d — $%s" % [gs.elemental_level + 1, _fmt(gs.elemental_cost())]
-	_btn_ele.disabled = not gs.can_upgrade_elemental()
+	_btn_ele.text     = "Nv.%d — $%s" % [GameState.elemental_level + 1, _fmt(GameState.elemental_cost())]
+	_btn_ele.disabled = not GameState.can_upgrade_elemental()
 
-	_btn_ki.text      = "Nv.%d — $%s" % [gs.ki_level + 1, _fmt(gs.ki_cost())]
-	_btn_ki.disabled  = not gs.can_upgrade_ki()
+	_btn_ki.text      = "Nv.%d — $%s" % [GameState.ki_level + 1, _fmt(GameState.ki_cost())]
+	_btn_ki.disabled  = not GameState.can_upgrade_ki()
 
 # ── Signal Handlers ────────────────────────────────────────────────────────────
 
@@ -354,8 +347,7 @@ func _on_stage_changed(_s: int) -> void:
 	_update_all()  # DrawTarget handles its own redraw via its own signal connection
 
 func _on_gold_changed(_g: int) -> void:
-	var gs = get_node("/root/GameState")
-	_gold_lbl.text = "Oro: " + _fmt(gs.gold)
+	_gold_lbl.text = "Oro: " + _fmt(GameState.gold)
 	_update_button_states()
 
 func _on_stats_changed() -> void:

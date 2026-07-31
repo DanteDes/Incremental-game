@@ -3,9 +3,8 @@ extends Node2D
 var stage: int = -1
 
 func _ready() -> void:
-	var gs = get_node("/root/GameState")
-	gs.stage_changed.connect(_on_stage_changed)
-	stage = gs.stage
+	GameState.stage_changed.connect(_on_stage_changed)
+	stage = GameState.stage
 	queue_redraw()
 
 func _on_stage_changed(s: int) -> void:
@@ -63,9 +62,11 @@ func _draw_hay() -> void:
 		draw_line(Vector2(-34, y), Vector2(34, y), col_dark, 1.5)
 
 	# Straw end details on face
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 77
 	for i in 7:
 		var sx := -28.0 + i * 9.0
-		draw_line(Vector2(sx, -96), Vector2(sx + randf_range(-3, 3), -104), col_dark, 1)
+		draw_line(Vector2(sx, -96), Vector2(sx + rng.randf_range(-3, 3), -104), col_dark, 1)
 
 	# Rope bands
 	for ry in [-75.0, -40.0, -10.0]:
