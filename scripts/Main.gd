@@ -13,6 +13,10 @@ var _damage_container: Control
 var _hp_bar: ProgressBar
 var _hp_title_lbl: Label
 
+# Shader materials
+var _mat_player: ShaderMaterial
+var _mat_target: ShaderMaterial
+
 # Info panel
 var _gold_lbl: Label
 var _target_name_lbl: Label
@@ -46,20 +50,39 @@ func _build_scene() -> void:
 	var bg: Node2D = load("res://scripts/DrawBackground.gd").new()
 	add_child(bg)
 
-	# Player character
+	# Player character + ki aura shader
 	_player_node = load("res://scripts/DrawPlayer.gd").new()
 	_player_home = Vector2(vp.x * 0.3, vp.y * 0.68)
 	_player_node.position = _player_home
+	_mat_player = ShaderMaterial.new()
+	_mat_player.shader = load("res://shaders/ki_aura.gdshader")
+	_player_node.material = _mat_player
 	add_child(_player_node)
 
-	# Target (self-manages redraws via GameState signal)
+	# Target + hit flash shader
 	_target_node = load("res://scripts/DrawTarget.gd").new()
 	_target_home = Vector2(vp.x * 0.68, vp.y * 0.68)
 	_target_node.position = _target_home
+	_mat_target = ShaderMaterial.new()
+	_mat_target.shader = load("res://shaders/hit_flash.gdshader")
+	_target_node.material = _mat_target
 	add_child(_target_node)
 
-	# UI layer
+	# Vignette overlay (above game world, below UI)
+	var vignette_layer := CanvasLayer.new()
+	vignette_layer.layer = 1
+	add_child(vignette_layer)
+	var vignette_rect := ColorRect.new()
+	vignette_rect.set_anchors_preset(Control.PRESET_FULL_RECT)
+	vignette_rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var vignette_mat := ShaderMaterial.new()
+	vignette_mat.shader = load("res://shaders/vignette.gdshader")
+	vignette_rect.material = vignette_mat
+	vignette_layer.add_child(vignette_rect)
+
+	# UI layer (above vignette)
 	var ui_layer := CanvasLayer.new()
+	ui_layer.layer = 2
 	add_child(ui_layer)
 
 	var ui_root := Control.new()
@@ -285,6 +308,22 @@ func _animate_punch() -> void:
 		_tween_player.kill()
 	if _tween_target:
 		_tween_target.kill()
+
+	# Ki aura flash on player
+	_mat_player.set_shader_parameter("aura", 1.0)
+	var tw_aura := create_tween()
+	tw_aura.tween_method(
+		func(v: float): _mat_player.set_shader_parameter("aura", v),
+		1.0, 0.0, 0.3
+	)
+
+	# Hit flash on target
+	_mat_target.set_shader_parameter("flash", 1.0)
+	var tw_flash := create_tween()
+	tw_flash.tween_method(
+		func(v: float): _mat_target.set_shader_parameter("flash", v),
+		1.0, 0.0, 0.18
+	)
 
 	_player_node.punch_anim()
 	_tween_player = create_tween()
