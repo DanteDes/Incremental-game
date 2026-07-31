@@ -36,20 +36,13 @@ float fbm(vec2 p) {
 }
 
 void fragment() {
-	// Fade out entirely below the horizon line (y > 0.66)
 	float sky_fade = smoothstep(0.66, 0.28, UV.y);
-	if (sky_fade < 0.005) { COLOR = vec4(0.0); return; }
 
-	// Slide UVs horizontally over time for drifting clouds
 	vec2 uv = UV * vec2(2.8, 1.8) + vec2(TIME * speed, 0.0);
 
-	// Two fbm layers at different scales for depth
 	float cloud  = fbm(uv);
 	float detail = fbm(uv * 2.3 + vec2(5.1, 3.7)) * 0.35;
-	cloud = cloud + detail;
-
-	// Shape into cloud masses
-	cloud = smoothstep(coverage - 0.18, coverage + 0.20, cloud);
+	cloud = smoothstep(coverage - 0.18, coverage + 0.20, cloud + detail);
 	cloud *= sky_fade * density;
 
 	COLOR = vec4(cloud_color.rgb, cloud * cloud_color.a);
